@@ -1,8 +1,15 @@
 import { Student } from './student.interface';
 import { StudentModel } from './student.model';
 
-const createStudentIntoDB = async (student: Student) => {
-  const result = await StudentModel.create(student);
+const createStudentIntoDB = async (studentData: Student) => {
+  /*
+  *Here we r using mongoose static method --> .create()
+  const result = await StudentModel.create(studentData);
+  return result; */
+
+  //here we r using instance method
+  const newStudent = new StudentModel(studentData);
+  const result = await newStudent.save();
   return result;
 };
 
