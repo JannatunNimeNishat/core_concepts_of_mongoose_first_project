@@ -1,6 +1,5 @@
 import { Schema, model } from 'mongoose';
 import validator from 'validator';
-
 import {
   StudentModel,
   TGuardian,
@@ -9,7 +8,8 @@ import {
   TUserName,
 } from './student.interface';
 import config from '../../config';
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
+
 const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
@@ -180,10 +180,12 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     enum: ['active', 'blocked'],
     default: 'active',
   },
+  isDeleted: { type: Boolean, default: false },
 });
 
 //middle ware
-//i. document middleware
+
+//i. Document middleware -> 'save'
 //-> pre save middleware/hook
 studentSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -192,14 +194,38 @@ studentSchema.pre('save', async function (next) {
   //we are hashing our password and save the hashed password to DB
   user.password = await bcrypt.hash(user.password, Number(config.saltRounds));
   next();
-
 });
 
 //-> post save middleware/hook
-//this hook will work after the data has saved on the database. 
-studentSchema.post('save', function (doc,next) { // this will contain the saved data on database
+//this hook will work after the data has saved on the database.
+studentSchema.post('save', function (doc, next) {
+  // this will contain the saved data on database
   //console.log('post: ', this);
   doc.password = ''; // we don't want to send the password to the user even if it is hashed. we just emptied the password field from the saved data.
+  next();
+});
+
+//ii. Query middleware -> 'find'
+
+//->pre find middleware/hook
+//this pre middleware will effect before the current query get executed
+studentSchema.pre('find', async function (next) {
+  this.find({ isDeleted: { $ne: true } }); // gives all the documents except the deleted one. here isDeled === false
+  next();
+});
+
+//-> findOne
+studentSchema.pre('findOne', async function (next) {
+  this.find({ isDeleted: { $ne: true } }); // gives only one document which here isDeled === false
+  next();
+});
+
+//-> aggregate
+studentSchema.pre('aggregate', async function (next) {
+  //console.log(this.pipeline());
+  // [{ $match: { isDeleted: { $ne: true } } }, { '$match': { id: '123452' } } ]
+  //here we filter out the deleted fields
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
   next();
 });
 
