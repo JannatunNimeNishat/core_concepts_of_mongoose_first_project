@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import validator from 'validator';
+
 import {
   StudentModel,
   TGuardian,
@@ -7,7 +8,8 @@ import {
   TStudent,
   TUserName,
 } from './student.interface';
-
+import config from '../../config';
+import bcrypt from 'bcrypt'
 const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
@@ -98,6 +100,7 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     type: userNameSchema,
     required: [true, 'name is required'],
   },
+  password: { type: String, required: [true, 'password field is required'] },
   gender: {
     //male or female as par student interface
     type: String,
@@ -177,6 +180,27 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     enum: ['active', 'blocked'],
     default: 'active',
   },
+});
+
+//middle ware
+//i. document middleware
+//-> pre save middleware/hook
+studentSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  //console.log('pre: ', this);
+  //we are hashing our password and save the hashed password to DB
+  user.password = await bcrypt.hash(user.password, Number(config.saltRounds));
+  next();
+
+});
+
+//-> post save middleware/hook
+//this hook will work after the data has saved on the database. 
+studentSchema.post('save', function (doc,next) { // this will contain the saved data on database
+  //console.log('post: ', this);
+  doc.password = ''; // we don't want to send the password to the user even if it is hashed. we just emptied the password field from the saved data.
+  next();
 });
 
 //custom static method defination

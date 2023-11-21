@@ -26,6 +26,7 @@ export type TLocalGuardian = {
 export type TStudent = {
   id: string;
   name: TUserName;
+  password: string;
   gender: 'male' | 'female' | 'other';
   email: string;
   dateOfBirth?: string;
@@ -52,16 +53,10 @@ export type TStudent = {
   isActive: 'active' | 'blocked';
 };
 
-
 //1. static method
 export interface StudentModel extends Model<TStudent> {
   isUserExists(id: string): Promise<TStudent | null>;
 }
-
-
-
-
-
 
 //2.instance method
 //we are creating a custom instance method to check a user is already present on the database or not.
