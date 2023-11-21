@@ -1,10 +1,12 @@
-export type UserName = {
+import { Model } from 'mongoose';
+
+export type TUserName = {
   firstName: string;
-  middleNam?: string;
+  middleName?: string;
   lastName: string;
 };
 
-export type Guardian = {
+export type TGuardian = {
   fatherName: string;
   fatherOccupation: string;
   fatherContactNo: string;
@@ -13,7 +15,7 @@ export type Guardian = {
   motherContactNo: string;
 };
 
-export type LocalGuardian = {
+export type TLocalGuardian = {
   name: string;
   occupation: string;
   contactNo: string;
@@ -21,9 +23,9 @@ export type LocalGuardian = {
 };
 
 //1. creating Student interface
-export type Student = {
+export type TStudent = {
   id: string;
-  name: UserName;
+  name: TUserName;
   gender: 'male' | 'female' | 'other';
   email: string;
   dateOfBirth?: string;
@@ -44,8 +46,31 @@ export type Student = {
     | 'O-';
   presentAddress: string;
   permanentAddress: string;
-  guardian: Guardian;
-  localGuardian: LocalGuardian;
+  guardian: TGuardian;
+  localGuardian: TLocalGuardian;
   profileImg?: string;
   isActive: 'active' | 'blocked';
 };
+
+
+//1. static method
+export interface StudentModel extends Model<TStudent> {
+  isUserExists(id: string): Promise<TStudent | null>;
+}
+
+
+
+
+
+
+//2.instance method
+//we are creating a custom instance method to check a user is already present on the database or not.
+/* export type StudentMethods = {
+  isUserExists(id: string): Promise<TStudent | null>; //function type
+};
+export type StudentModel = Model<
+  TStudent,
+  Record<string, never>,
+  StudentMethods
+>;
+ */
