@@ -92,95 +92,107 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 
 //2. creating student Schema
 // const studentSchema = new Schema<Student>({
-const studentSchema = new Schema<TStudent, StudentModel>({
-  //for static method
-  // const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({ //for instance method
-  id: { type: String, required: true, unique: true },
-  name: {
-    type: userNameSchema,
-    required: [true, 'name is required'],
-  },
-  password: { type: String, required: [true, 'password field is required'] },
-  gender: {
-    //male or female as par student interface
-    type: String,
-    enum: {
-      values: ['male', 'female', 'other'],
-      message:
-        "'{VALUE}' is not valid. The gender field can only be one of the following: 'male', 'female' or 'other'",
+const studentSchema = new Schema<TStudent, StudentModel>(
+  {
+    //for static method
+    // const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({ //for instance method
+    id: { type: String, required: true, unique: true },
+    name: {
+      type: userNameSchema,
+      required: [true, 'name is required'],
     },
-    required: [true, 'gender is required'],
+    password: { type: String, required: [true, 'password field is required'] },
+    gender: {
+      //male or female as par student interface
+      type: String,
+      enum: {
+        values: ['male', 'female', 'other'],
+        message:
+          "'{VALUE}' is not valid. The gender field can only be one of the following: 'male', 'female' or 'other'",
+      },
+      required: [true, 'gender is required'],
+    },
+    dateOfBirth: { type: String, trim: true },
+    email: {
+      type: String,
+      trim: true,
+      required: [true, 'email is required'],
+      unique: true,
+      validate: {
+        validator: (value: string) => validator.isEmail(value),
+        message: '{VALUE} is not a valid email',
+      },
+    },
+    contactNo: {
+      type: String,
+      trim: true,
+      required: [true, 'contactNo is required'],
+    },
+    emergencyContactNo: {
+      type: String,
+      trim: true,
+      required: [true, 'emergencyContactNo is required'],
+    },
+    bloodGroup: {
+      type: String,
+      enum: {
+        values: [
+          'A',
+          'B',
+          'AB',
+          'O',
+          'A+',
+          'A-',
+          'B+',
+          'B-',
+          'AB+',
+          'AB-',
+          'O+',
+          'O-',
+        ],
+        message:
+          "'{VALUE}' is not valid. The bloodGroup field can only be one of the following:'A' 'B' 'AB' 'O' 'A+' 'A-' 'B+' 'B-' 'AB+' 'AB-' 'O+' 'O-'",
+      },
+      required: true,
+    },
+    presentAddress: {
+      type: String,
+      trim: true,
+      required: [true, 'presentAddress is required'],
+    },
+    permanentAddress: {
+      type: String,
+      trim: true,
+      required: [true, 'permanentAddress is required'],
+    },
+    guardian: {
+      type: guardianSchema,
+      trim: true,
+      required: [true, 'guardian is required'],
+    },
+    localGuardian: {
+      type: localGuardianSchema,
+      trim: true,
+      required: [true, 'localGuardian is required'],
+    },
+    profileImg: { type: String },
+    isActive: {
+      type: String,
+      enum: ['active', 'blocked'],
+      default: 'active',
+    },
+    isDeleted: { type: Boolean, default: false },
   },
-  dateOfBirth: { type: String, trim: true },
-  email: {
-    type: String,
-    trim: true,
-    required: [true, 'email is required'],
-    unique: true,
-    validate: {
-      validator: (value: string) => validator.isEmail(value),
-      message: '{VALUE} is not a valid email',
+  {
+    toJSON: {
+      virtuals: true,
     },
   },
-  contactNo: {
-    type: String,
-    trim: true,
-    required: [true, 'contactNo is required'],
-  },
-  emergencyContactNo: {
-    type: String,
-    trim: true,
-    required: [true, 'emergencyContactNo is required'],
-  },
-  bloodGroup: {
-    type: String,
-    enum: {
-      values: [
-        'A',
-        'B',
-        'AB',
-        'O',
-        'A+',
-        'A-',
-        'B+',
-        'B-',
-        'AB+',
-        'AB-',
-        'O+',
-        'O-',
-      ],
-      message:
-        "'{VALUE}' is not valid. The bloodGroup field can only be one of the following:'A' 'B' 'AB' 'O' 'A+' 'A-' 'B+' 'B-' 'AB+' 'AB-' 'O+' 'O-'",
-    },
-    required: true,
-  },
-  presentAddress: {
-    type: String,
-    trim: true,
-    required: [true, 'presentAddress is required'],
-  },
-  permanentAddress: {
-    type: String,
-    trim: true,
-    required: [true, 'permanentAddress is required'],
-  },
-  guardian: {
-    type: guardianSchema,
-    trim: true,
-    required: [true, 'guardian is required'],
-  },
-  localGuardian: {
-    type: localGuardianSchema,
-    trim: true,
-    required: [true, 'localGuardian is required'],
-  },
-  profileImg: { type: String },
-  isActive: {
-    type: String,
-    enum: ['active', 'blocked'],
-    default: 'active',
-  },
-  isDeleted: { type: Boolean, default: false },
+);
+
+//virtual
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
 });
 
 //middle ware
