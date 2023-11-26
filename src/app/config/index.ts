@@ -7,4 +7,5 @@ export default {
   saltRounds: process.env.BCRYPT_SALT_ROUNDS,
   port: process.env.PORT,
   database_url: process.env.DATABASE_URL,
+  default_password:process.env.DEFAULT_PASS,
 };

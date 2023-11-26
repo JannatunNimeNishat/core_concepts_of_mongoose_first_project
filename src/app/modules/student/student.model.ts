@@ -7,8 +7,7 @@ import {
   TStudent,
   TUserName,
 } from './student.interface';
-import config from '../../config';
-import bcrypt from 'bcrypt';
+
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -91,17 +90,19 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 });
 
 //2. creating student Schema
-// const studentSchema = new Schema<Student>({
 const studentSchema = new Schema<TStudent, StudentModel>(
   {
-    //for static method
-    // const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({ //for instance method
     id: { type: String, required: true, unique: true },
+    user: {
+      type: Schema.Types.ObjectId, //it will contain the reference id of user data
+      required: [true, 'user id field is required'],
+      unique: true,
+      ref: 'User',
+    },
     name: {
       type: userNameSchema,
       required: [true, 'name is required'],
     },
-    password: { type: String, required: [true, 'password field is required'] },
     gender: {
       //male or female as par student interface
       type: String,
@@ -176,11 +177,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       required: [true, 'localGuardian is required'],
     },
     profileImg: { type: String },
-    isActive: {
-      type: String,
-      enum: ['active', 'blocked'],
-      default: 'active',
-    },
     isDeleted: { type: Boolean, default: false },
   },
   {
@@ -195,27 +191,8 @@ studentSchema.virtual('fullName').get(function () {
   return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
 });
 
-//middle ware
 
-//i. Document middleware -> 'save'
-//-> pre save middleware/hook
-studentSchema.pre('save', async function (next) {
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this;
-  //console.log('pre: ', this);
-  //we are hashing our password and save the hashed password to DB
-  user.password = await bcrypt.hash(user.password, Number(config.saltRounds));
-  next();
-});
 
-//-> post save middleware/hook
-//this hook will work after the data has saved on the database.
-studentSchema.post('save', function (doc, next) {
-  // this will contain the saved data on database
-  //console.log('post: ', this);
-  doc.password = ''; // we don't want to send the password to the user even if it is hashed. we just emptied the password field from the saved data.
-  next();
-});
 
 //ii. Query middleware -> 'find'
 
@@ -247,12 +224,7 @@ studentSchema.statics.isUserExists = async function (id: string) {
   return existingUser;
 };
 
-// custom instance method defination
-/* studentSchema.methods.isUserExists = async function (id: string) {
-  const existingUser = await Student.findOne({ id: id });
-  return existingUser;
-}; */
 
-// 3. Create a Model.
-// export const Student = model<TStudent>('Student', studentSchema);
+
+
 export const Student = model<TStudent, StudentModel>('Student', studentSchema);

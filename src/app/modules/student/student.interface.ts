@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type TUserName = {
   firstName: string;
@@ -25,8 +25,8 @@ export type TLocalGuardian = {
 //1. creating Student interface
 export type TStudent = {
   id: string;
+  user:Types.ObjectId; //it will contain the reference id of user data
   name: TUserName;
-  password: string;
   gender: 'male' | 'female' | 'other';
   email: string;
   dateOfBirth?: string;
@@ -50,7 +50,6 @@ export type TStudent = {
   guardian: TGuardian;
   localGuardian: TLocalGuardian;
   profileImg?: string;
-  isActive: 'active' | 'blocked';
   isDeleted: boolean;
 };
 

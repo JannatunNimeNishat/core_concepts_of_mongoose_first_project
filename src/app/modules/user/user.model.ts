@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { TUser } from './user.interface';
-
+import config from '../../config';
+import bcrypt from 'bcrypt';
 const userSchema = new Schema<TUser>(
   {
     id: {
@@ -22,6 +23,7 @@ const userSchema = new Schema<TUser>(
     status: {
       type: String,
       enum: ['in-progress', 'blocked'],
+      default:'in-progress'
     },
     isDeleted: {
       type: Boolean,
@@ -29,8 +31,26 @@ const userSchema = new Schema<TUser>(
     },
   },
   {
-    timestamps: true, //created and updatedAt will autometically created by mongoose
+    timestamps: true, //created and updatedAt will automatically created by mongoose
   },
 );
+
+
+//middle ware
+
+
+userSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  user.password = await bcrypt.hash(user.password, Number(config.saltRounds));
+  next();
+}); 
+
+
+// set '' after saving password
+ userSchema.post('save', function (doc, next) {
+  doc.password = ''; 
+  next();
+}); 
 
 export const User = model<TUser>('User', userSchema);
