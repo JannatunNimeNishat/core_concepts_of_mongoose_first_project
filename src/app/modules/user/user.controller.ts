@@ -1,12 +1,12 @@
 // import studentValidationSchema from './student.validation';
 
-import { NextFunction, Request, Response } from "express";
+import {  RequestHandler} from "express"; // RequestHandler -> createStudent er req:Request, res:Response next:NextFunction er type auto declare kore dey
 import { UserServices } from "./user.service";
 import sendResponse from "../../utils/sendResponse";
 
 import httpStatus from 'http-status';
 
-const createStudent = async (req: Request, res: Response, next:NextFunction) => {
+const createStudent:RequestHandler = async (req, res, next) => { // RequestHandler -> createStudent er req:Request, res:Response next:NextFunction er type auto declare kore dey
     try {
       const {password, student: studentData } = req.body;
   
