@@ -4,7 +4,7 @@ import { AcademicSemesterCode, AcademicSemesterName, Months } from './academicSe
 
 //we are following DRY so we cut our constants and create a new file called academicSemester.constant.ts and past there so that we can use those const from validation and others if necessary
 
-export const academicSemesterSchema = new Schema<TAcademicSemester>(
+ const academicSemesterSchema = new Schema<TAcademicSemester>(
   {
     name: {
       type: String,
@@ -12,7 +12,7 @@ export const academicSemesterSchema = new Schema<TAcademicSemester>(
       required: true,
     },
     year: {
-      type: Date,
+      type: String,
       required: true,
     },
     code: {
