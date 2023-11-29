@@ -48,7 +48,13 @@ const getAllAcademicSemesterFromDB = async ()=>{
   return result;
 }
 
+const getSingleAcademicSemesterFromDB =async (payload:string) => {
+  const result = await AcademicSemester.findOne({_id:payload});
+  return result;
+}
+
 export const AcademicSemesterServices = {
   createAcademicSemesterIntoDB,
-  getAllAcademicSemesterFromDB
+  getAllAcademicSemesterFromDB,
+  getSingleAcademicSemesterFromDB
 };
