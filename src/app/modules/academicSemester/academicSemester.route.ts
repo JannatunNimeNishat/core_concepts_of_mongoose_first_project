@@ -15,7 +15,7 @@ router.post(
 router.get('/',AcademicSemesterControllers.getAllAcademicSemester)
 router.get('/:semesterId',AcademicSemesterControllers.getSingleAcademicSemester)
 
-router.patch('/:semesterId',validateRequest(AcademicSemesterValidations.academicSemesterValidationSchema),AcademicSemesterControllers.updateAcademicSemester)
+router.patch('/:semesterId',validateRequest(AcademicSemesterValidations.updateAcademicSemesterValidationSchema),AcademicSemesterControllers.updateAcademicSemester)
 
 
 export const AcademicSemesterRoutes = router;
