@@ -10,3 +10,11 @@ export type TAcademicSemester = {
   startMonth: TMonths;
   endMonth: TMonths;
 };
+
+export type TAcademicSemesterNameCodeMapper = {
+  /* Autumn: '01';
+  Summer: '02';
+  Fall: '03'; */
+  //or we can use map type
+  [key:string]:string;
+};
