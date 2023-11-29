@@ -53,8 +53,17 @@ const getSingleAcademicSemesterFromDB =async (payload:string) => {
   return result;
 }
 
+const updateAcademicSemesterIntoDB =async (semesterId:string,payload:Partial<TAcademicSemester>) => { // je je data dibe sudu saigula update hobe. sob data aksate deyar dorkar nia. 
+  if(payload.name && payload.code && academicSemesterNameCodeMapper[payload.name] !== payload.code){
+    throw new Error('invalid semester code');
+  }
+    const result = await AcademicSemester.findOneAndUpdate({_id:semesterId},payload,{new:true});
+    return result;
+}
+
 export const AcademicSemesterServices = {
   createAcademicSemesterIntoDB,
   getAllAcademicSemesterFromDB,
-  getSingleAcademicSemesterFromDB
+  getSingleAcademicSemesterFromDB,
+  updateAcademicSemesterIntoDB
 };
