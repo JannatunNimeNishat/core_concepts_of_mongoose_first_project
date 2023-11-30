@@ -14,17 +14,7 @@ const updateAcademicFacultyValidationSchema = z.object({
           }),
     })
 })
-/* const createAcademicFacultyValidationSchema = z.object({
-  name: z.string({
-    invalid_type_error: 'Academic faculty must be a string',
-  }),
-}); */
-/* const updateAcademicFacultyValidationSchema = z.object({
-  name: z.string({
-    invalid_type_error: 'Academic faculty must be a string',
-  }),
-});
- */
+
 export const academicFacultyValidations = {
   createAcademicFacultyValidationSchema,
   updateAcademicFacultyValidationSchema
