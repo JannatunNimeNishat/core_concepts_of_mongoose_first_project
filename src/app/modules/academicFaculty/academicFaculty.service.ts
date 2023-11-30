@@ -29,7 +29,7 @@ const updateAcademicFacultyIntoDB = async (
   return result;
 };
 
-export const AcademicSemesterServices = {
+export const AcademicFacultyServices = {
   createAcademicFacultyIntoDB,
   getAllAcademicFacultyFromDB,
   getSingleAcademicFacultyFromDB,
