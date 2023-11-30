@@ -1,9 +1,9 @@
 import config from '../../config';
-import { TAcademicSemester } from '../academicSemester/academicSemester.interface';
+
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
-import { NewUser, TUser } from './user.interface';
+import { TUser } from './user.interface';
 import { User } from './user.model';
 import { generateStudentId } from './user.utils';
 
@@ -24,9 +24,10 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   //we are finding the academicSemester info with the help of reference property called admissionSemester saved in Student model. so that we can use the semester year and code for creating studentId 
   const admissionSemester = await AcademicSemester.findById(payload.admissionSemester);
 
-
+if(admissionSemester){ // otherwise it generate error warning
   //set  generated id
   userData.id = await generateStudentId(admissionSemester);
+}
 
   const newUser = await User.create(userData);
 
