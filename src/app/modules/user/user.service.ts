@@ -1,3 +1,4 @@
+import { startSession } from 'mongoose';
 import config from '../../config';
 
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
@@ -6,6 +7,8 @@ import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 import { generateStudentId } from './user.utils';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   //create a user
@@ -18,29 +21,57 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   //set student role
   userData.role = 'student';
 
-
-
   //finding academic semester info
-  //we are finding the academicSemester info with the help of reference property called admissionSemester saved in Student model. so that we can use the semester year and code for creating studentId 
-  const admissionSemester = await AcademicSemester.findById(payload.admissionSemester);
+  //we are finding the academicSemester info with the help of reference property called admissionSemester saved in Student model. so that we can use the semester year and code for creating studentId
+  const admissionSemester = await AcademicSemester.findById(
+    payload.admissionSemester,
+  );
 
-if(admissionSemester){ // otherwise it generate error warning
-  //set  generated id
-  userData.id = await generateStudentId(admissionSemester);
-}
+  /**implementing transaction and rollback */
+  //s1 -> create session
+  const session = await startSession();
+  try {
+    //s2 -> start session
+    session.startTransaction();
 
-  const newUser = await User.create(userData);
+    if (admissionSemester) {
+      // otherwise it generate error warning
+      //set  generated id
+      userData.id = await generateStudentId(admissionSemester);
+    }
 
-  //create a student
-  if (Object.keys(newUser).length) {
-    
+    //s3 -> create a user (transaction-1)
+    const newUser = await User.create([userData], { session });
+    // const newUser = await User.create(userData);
+
+    //s4 -> if the user is not created that means transaction is not successful.
+    if (!newUser.length) {
+      // because now we are getting an array
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
+    }
+
     //set id, _id as user
-    payload.id = newUser.id; // embedding id
-    payload.user = newUser._id; // reference _id
+    payload.id = newUser[0].id; // embedding id
+    payload.user = newUser[0]._id; // reference _id
 
-    const newStudent = await Student.create(payload);
+    //s5 -> create a student (transaction-2)
+    const newStudent = await Student.create([payload], { session });
+    // const newStudent = await Student.create(payload);
+
+    //s6 ->if the student is not created that means transaction is not successful.
+    if (!newStudent.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
+    }
+
+    //s7 -> if all good.
+    await session.commitTransaction();
+    await session.endSession();
+
     return newStudent;
-    
+  } catch (error) {
+    //s8 -> is anything goes wrong. abort Transaction and end session
+    await session.abortTransaction();
+    await session.endSession();
   }
 
   //return newUser;
