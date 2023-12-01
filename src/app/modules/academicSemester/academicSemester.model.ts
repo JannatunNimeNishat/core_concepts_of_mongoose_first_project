@@ -1,6 +1,8 @@
 import { Schema, model } from 'mongoose';
 import { TAcademicSemester} from './academicSemester.interface';
 import { AcademicSemesterCode, AcademicSemesterName, Months } from './academicSemester.constant';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
 
 //we are following DRY so we cut our constants and create a new file called academicSemester.constant.ts and past there so that we can use those const from validation and others if necessary
 
@@ -45,7 +47,7 @@ const isSemesterExists = await AcademicSemester.findOne({
   name:this.name, // name database er name field etai amader pathono name (this.name) exist kore ki na
 })
 if(isSemesterExists){ // aki year e amader pathono nam e semester already ase, amra 2 bar aki nam e aki year e semester create korte dibo na. ti error throw kore disci jate create korte na pare
-throw new Error('Semester is already exists!');
+throw new AppError(httpStatus.NOT_FOUND,'Semester is already exists!');
 }
   next();
 })

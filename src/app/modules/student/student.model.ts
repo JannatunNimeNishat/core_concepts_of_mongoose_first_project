@@ -8,7 +8,6 @@ import {
   TUserName,
 } from './student.interface';
 
-
 const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
@@ -172,13 +171,13 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       required: [true, 'localGuardian is required'],
     },
     profileImg: { type: String },
-    admissionSemester:{
-      type:Schema.Types.ObjectId,
-      ref:'AcademicSemester'
+    admissionSemester: {
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicSemester',
     },
-    academicDepartment:{
-      type:Schema.Types.ObjectId,
-      ref:"AcademicDepartment"
+    academicDepartment: {
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicDepartment',
     },
     isDeleted: { type: Boolean, default: false },
   },
@@ -189,13 +188,12 @@ const studentSchema = new Schema<TStudent, StudentModel>(
   },
 );
 
+
+
 //virtual
 studentSchema.virtual('fullName').get(function () {
   return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
 });
-
-
-
 
 //ii. Query middleware -> 'find'
 
@@ -226,8 +224,5 @@ studentSchema.statics.isUserExists = async function (id: string) {
   const existingUser = await Student.findOne({ id: id });
   return existingUser;
 };
-
-
-
 
 export const Student = model<TStudent, StudentModel>('Student', studentSchema);

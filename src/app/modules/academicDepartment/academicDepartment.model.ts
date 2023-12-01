@@ -1,5 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { TAcademicDepartment } from './academicDepartment.interface';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
 
 const academicDepartmentSchema = new Schema<TAcademicDepartment>(
   {
@@ -19,12 +21,14 @@ const academicDepartmentSchema = new Schema<TAcademicDepartment>(
   },
 );
 
+
+
 // department already exist or not.
 academicDepartmentSchema.pre('save', async function (next) {
   const isDepartmentExists = await AcademicDepartment.findOne({ name: this.name });
   if (isDepartmentExists) {
-    throw new Error(
-      'One Department with this name is Already Present in the Database',
+    throw new AppError(
+      httpStatus.NOT_FOUND,'One Department with this name is Already Present in the Database',
     );
   }
   next();
@@ -37,9 +41,7 @@ academicDepartmentSchema.pre('findOneAndUpdate', async function(next){
     const isDepartmentExists = await AcademicDepartment.findOne(query);
     
     if (!isDepartmentExists) {
-        throw new Error(
-          'This Department does not exist in the Database',
-        );
+        throw new AppError(httpStatus.NOT_FOUND ,'This Department does not exist in the Database'); // calling AppError with status code
       }
       next();
 })
