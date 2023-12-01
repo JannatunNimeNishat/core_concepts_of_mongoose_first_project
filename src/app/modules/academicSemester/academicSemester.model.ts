@@ -53,7 +53,7 @@ throw new Error('Semester is already exists!');
 
 
 export const AcademicSemester = model<TAcademicSemester>(
-  'academicSemester',
+  'AcademicSemester',
   academicSemesterSchema,
 );
 

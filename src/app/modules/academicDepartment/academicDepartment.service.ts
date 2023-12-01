@@ -8,12 +8,12 @@ const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
 };
 
 const getAllAcademicDepartmentFromDB = async () => {
-  const result = await AcademicDepartment.find();
+  const result = await AcademicDepartment.find().populate('academicFaculty'); // populate referance kora field er value, academicFaculty er value academicFaculty collection er value deya output dey. acon r agar moto sudu id asbe na AcademicFaculty collection er real data e asbe
   return result;
 };
 
-const getSingleAcademicDepartmentFromDB = async (payload: string) => {
-  const result = await AcademicDepartment.findOne({ _id: payload });
+const getSingleAcademicDepartmentFromDB = async (id: string) => {
+  const result = await AcademicDepartment.findById(id).populate('academicFaculty');
   return result;
 };
 
