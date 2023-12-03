@@ -34,7 +34,7 @@ const getSingleStudentFormDB = async (id: string) => {
 };
 
 //update students primitive and non-primitive data -> best approach
-const updateStudentIntoFormDB = async (id: string, payload:Partial<TStudent>) => {
+const updateStudentIntoDB = async (id: string, payload:Partial<TStudent>) => {
 
   //getting the primitive and non-primitive data
   const {name,guardian, localGuardian, ...remainingStudentData} = payload;
@@ -113,6 +113,6 @@ const deleteStudentFromDB = async (id: string) => {
 export const StudentServices = {
   getAllStudentsFromDB,
   getSingleStudentFormDB,
-  updateStudentIntoFormDB,
+  updateStudentIntoDB,
   deleteStudentFromDB,
 };

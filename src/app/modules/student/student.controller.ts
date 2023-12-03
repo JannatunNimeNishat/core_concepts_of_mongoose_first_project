@@ -39,7 +39,7 @@ const updateStudent= catchAsync(async (req, res) => {
   
     const { studentId } = req.params;
     const {student} = req.body;
-    const result = await StudentServices.updateStudentIntoFormDB(studentId, student);
+    const result = await StudentServices.updateStudentIntoDB(studentId, student);
 
     sendResponse(res, {
       success: true,

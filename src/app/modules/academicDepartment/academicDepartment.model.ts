@@ -28,7 +28,7 @@ academicDepartmentSchema.pre('save', async function (next) {
   const isDepartmentExists = await AcademicDepartment.findOne({ name: this.name });
   if (isDepartmentExists) {
     throw new AppError(
-      httpStatus.NOT_FOUND,'One Department with this name is Already Present in the Database',
+      httpStatus.NOT_FOUND,'This Department with this name is Already Present in the Database',
     );
   }
   next();
