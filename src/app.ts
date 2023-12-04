@@ -16,9 +16,10 @@ app.use('/api/v1', router);
 app.use('/api/v1/users', UserRouters); */
 
 //test route
-app.get('/', (req: Request, res: Response) => {
-  const a = 10;
-  res.send(a);
+app.get('/', async(req: Request, res: Response) => {
+  //Promise.reject();
+  /* const a = 10;
+  res.send(a); */
 });
 
 //global error handling middleware

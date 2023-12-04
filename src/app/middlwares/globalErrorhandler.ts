@@ -89,7 +89,7 @@ const globalErrorhandler: ErrorRequestHandler = (error, req, res, next) => {
     success: false,
     message: message,
     errorSources,
-    error, //to see the full error
+   // error, //to see the full error
     stack: config.NODE_ENV === 'development' ? error?.stack : null, // stack only send when it is development environment other wise null
   });
 };
