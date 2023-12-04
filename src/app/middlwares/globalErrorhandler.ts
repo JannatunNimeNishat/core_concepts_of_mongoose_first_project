@@ -7,6 +7,7 @@ import { TErrorSources } from '../interface/error';
 import config from '../config';
 import { handleZodError } from '../errors/handelZodError';
 import handleValidationError from '../errors/handleValidatoinError';
+import handleCastError from '../errors/handleCastError';
 
 /** Common error pattern
  *
@@ -49,6 +50,11 @@ const globalErrorhandler: ErrorRequestHandler = (error, req, res, next) => {
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSources = simplifiedError?.errorSources;
+  } else if(error?.name === 'CastError'){ //this error occurs When input value which we are sending doesn't match the specified data type in the schema.
+    const simplifiedError = handleCastError(error);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
   }
 
   //ultimate return
@@ -56,7 +62,7 @@ const globalErrorhandler: ErrorRequestHandler = (error, req, res, next) => {
     success: false,
     message: message,
     errorSources,
-    //error, //to see the full error
+    error, //to see the full error
     stack: config.NODE_ENV === 'development' ? error?.stack : null, // stack only send when it is development environment other wise null
   });
 };
