@@ -5,35 +5,44 @@ import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { studentSearchableFields } from './student.constant';
 
 //getAllStudentsFromDB er moddai amra search and getAll student korbo. jodi url e ?searchTerm=value dey tahole search kore value ber kore anbe. r na dile searchTerm sob student return korbe
-const getAllStudentsFromDB = async (query: Record<string, unknown>) => {//{ searchTerm: 'Raf' }
+const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  //{ searchTerm: 'Raf' }
 
-  const queryObject = {...query}; //making copy of the query object
+  //code
+  //const queryObject = {...query}; //making copy of the query object
 
+  /*// i. searching
+
+  //code
   let searchTerm = ''; //default
-
+  //code
   if (query?.searchTerm) {
     //url e search team deya takle searchTerm er default value replace kore dibe
     searchTerm = query?.searchTerm as string;
   }
 
   //searchTerm er value ke amra 3 ta filed er value te search korteci. ei  jonno map use kore hoyce. r  name, name.firstName, email je kono akta field e match korlai result dibe ai jonno $or use kora hosce. r $options:i case sensitive er jonno.
+  //ex:
   //{'email':{$regex:query.searchTerm, $option:i}}
   //or
   //{'name.firstName':{$regex:query.searchTerm, $option:i}}
   //or
   //{'presentAddress':{$regex:query.searchTerm, $option:i}}
 
-  // i. searching
+  //code:
   const studentSearchableFields = ['email', 'name.firstName', 'presentAddress'];
   const searchQuery = Student.find({
     $or: studentSearchableFields.map((field) => ({
       [field]: { $regex: searchTerm, $options: 'i' },
     })),
   });
+  */
 
-  // ii. filtering
+  /*// ii. filtering
   //query parameter e asha searchTerm, sort, ba aro onno je gula varibale asbe oigula amra bad deya sudu email ta ke rakteci karon amra email deya filter kortecai. 
   const excludeFields = ['searchTerm','sort', 'limit','page','fields'];
   excludeFields.forEach(el => delete queryObject[el]);
@@ -50,17 +59,18 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {//{ sear
         path: 'academicFaculty',
       },
     });
+    */
 
-    // iii. sort 
+  /*  // iii. sort 
     let sort = '-createdAt'; //default sort value. jodi sort na ase input teka tokon je last e db te add hobe se sobar 1st e asbe. 
 
     if(query.sort){
       sort = query.sort as string;
     }
     const sortQuery = filterQuery.sort(sort);
+    */
 
-
-    // iv. pagination
+  /* // iv. pagination
     let page = 1; 
     let limit = 1; // by default limit 1
     let skip = 0;
@@ -75,11 +85,10 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {//{ sear
     }
     const paginateQuery = sortQuery.skip(skip);
 
-
-// v. limit
     const limitQuery = paginateQuery.limit(limit);
+    */
 
-    // vi. filed limiting
+  /* // vi. filed limiting
     let fields = '-__v'; // by default __v bad deya hosce. 
 
     // incoming format -> 'name,email'
@@ -89,9 +98,29 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {//{ sear
     }
 
     const filedQuery = await limitQuery.select(fields)
-
-
   return filedQuery;
+  */
+
+  //new
+  //queryBuilder
+  /* const studentQuery = new QueryBuilder(Student.find(),query).search(studentSearchableFields).filter().sort().paginate().fields(); */
+  const studentQuery = new QueryBuilder(
+    Student.find()
+    .populate('admissionSemester')
+    .populate({
+      path: 'academicDepartment',
+      populate: { path: 'academicFaculty' },
+    }),
+    query,
+  )
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await studentQuery.modelQuery;
+  return result;
 };
 
 const getSingleStudentFormDB = async (id: string) => {
