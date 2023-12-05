@@ -35,9 +35,10 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {//{ sear
 
   // ii. filtering
   //query parameter e asha searchTerm, sort, ba aro onno je gula varibale asbe oigula amra bad deya sudu email ta ke rakteci karon amra email deya filter kortecai. 
-  const excludeFields = ['searchTerm','sort'];
+  const excludeFields = ['searchTerm','sort', 'limit','page','fields'];
   excludeFields.forEach(el => delete queryObject[el]);
-  console.log({query, queryObject});
+  console.log('base query: ',query);
+
   //chaining. it works as 2 finds
   const filterQuery = searchQuery
     .find(queryObject)// filter is happening here
@@ -56,11 +57,41 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {//{ sear
     if(query.sort){
       sort = query.sort as string;
     }
+    const sortQuery = filterQuery.sort(sort);
 
-    const sortQuery = await filterQuery.sort(sort)
+
+    // iv. pagination
+    let page = 1; 
+    let limit = 1; // by default limit 1
+    let skip = 0;
+
+    if(query.limit){
+      limit = Number(query.limit);
+    }
+
+    if(query.page){
+      page = Number(query.page);
+      skip = (page-1)*limit;
+    }
+    const paginateQuery = sortQuery.skip(skip);
 
 
-  return sortQuery;
+// v. limit
+    const limitQuery = paginateQuery.limit(limit);
+
+    // vi. filed limiting
+    let fields = '-__v'; // by default __v bad deya hosce. 
+
+    // incoming format -> 'name,email'
+    // converted format -> 'name email'
+    if(query.fields){
+      fields = (query.fields as string).split(',').join(' ');
+    }
+
+    const filedQuery = await limitQuery.select(fields)
+
+
+  return filedQuery;
 };
 
 const getSingleStudentFormDB = async (id: string) => {
