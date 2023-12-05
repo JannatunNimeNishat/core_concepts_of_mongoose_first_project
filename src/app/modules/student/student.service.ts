@@ -6,9 +6,27 @@ import httpStatus from 'http-status';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
 
-const getAllStudentsFromDB = async () => {
-  // const result = await Student.find().populate('admissionSemester').populate('academicDepartment');
-  const result = await Student.find()
+
+//getAllStudentsFromDB er moddai amra search and getAll student korbo. jodi url e ?searchTerm=value dey tahole search kore value ber kore anbe. r na dile searchTerm sob student return korbe
+const getAllStudentsFromDB = async (query:Record<string, unknown>) => { //{ searchTerm: 'Raf' }
+
+  let searchTerm = ''; //default
+  if(query?.searchTerm){ //url e search team deya takle searchTerm er default value replace kore dibe
+    searchTerm = query?.searchTerm as string;
+  }
+  
+  //searchTerm er value ke amra 3 ta filed er value te search korteci. ei  jonno map use kore hoyce. r  name, name.firstName, email je kono akta field e match korlai result dibe ai jonno $or use kora hosce. r $options:i case sensitive er jonno.
+  //{'email':{$regex:query.searchTerm, $option:i}}
+  //or
+  //{'name.firstName':{$regex:query.searchTerm, $option:i}}
+  //or
+  //{'presentAddress':{$regex:query.searchTerm, $option:i}}
+  const studentSearchableFields = ['email','name.firstName','presentAddress'];
+  const result = await Student.find({
+    $or:studentSearchableFields.map((field)=> ({
+      [field]:{$regex:searchTerm, $options:'i'} 
+    }) )
+  })
     .populate('user')
     .populate('admissionSemester')
     .populate({

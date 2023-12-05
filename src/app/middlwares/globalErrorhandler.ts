@@ -73,8 +73,6 @@ const globalErrorhandler: ErrorRequestHandler = (error, req, res, next) => {
       },
     ];
   }else if (error instanceof Error) {// builtin Error class er error kao amader moto format korteci
-
-  
     message = error?.message;
     errorSources = [
       {
