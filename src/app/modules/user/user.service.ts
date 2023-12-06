@@ -6,9 +6,11 @@ import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
-import { generateStudentId } from './user.utils';
+import { generateFacultyId, generateStudentId } from './user.utils';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
+import { TFaculty } from '../faculty/faculty.interface';
+import { Faculty } from '../faculty/faculty.model';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   //create a user
@@ -79,6 +81,26 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   //return newUser;
 };
 
+const createFacultyIntoDB = async(password:string, payload:TFaculty)=>{
+
+  const userData:Partial<TUser> = {};
+  userData.password = password || (config.default_password as string);
+  userData.role = 'faculty';
+
+  userData.id = await generateFacultyId();
+
+  const newUser = await User.create(userData);
+
+  if(Object.keys(newUser).length){
+    payload.id = newUser?.id;
+    payload.user = newUser?._id;
+   const newFaculty = await Faculty.create(payload);
+    return newFaculty;
+  }
+
+}
+
 export const UserServices = {
   createStudentIntoDB,
+  createFacultyIntoDB
 };

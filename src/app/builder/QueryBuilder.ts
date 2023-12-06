@@ -1,7 +1,7 @@
 import { FilterQuery, Query } from 'mongoose';
 
 class QueryBuilder<T> {
-  public modelQuery: Query<T[], T>; //mongoose er data model -> Student, User ....
+  public modelQuery: Query<T[], T>; //mongoose er data model -> Student, User .... abong method like find()
   public query: Record<string, unknown>; //url e asha query variable gula. -> searchTerm, limit, email ...
 
   constructor(modelQuery: Query<T[], T>, query: Record<string, unknown>) {
@@ -9,7 +9,7 @@ class QueryBuilder<T> {
     this.query = query;
   }
 
-  //search
+  // i. search
   //searchTerm er value ke amra 3 ta filed er value te search korteci. ei  jonno map use kore hoyce. r  name, name.firstName, email je kono akta field e match korlai result dibe ai jonno $or use kora hosce. r $options:i case sensitive er jonno.
   //{'email':{$regex:query.searchTerm, $option:i}}
   //or
@@ -58,11 +58,11 @@ class QueryBuilder<T> {
     const limit = Number(this?.query?.limit || 1); // by default limit 1
     const skip = (page - 1) * limit;
 
-    this.modelQuery = this.modelQuery.skip(skip).limit(limit);
+    this.modelQuery = this?.modelQuery.skip(skip).limit(limit);
     return this;
   }
 
-  //v. fields
+  //v. fields limit
   fields() {
     // incoming format -> 'name,email' // converted format -> 'name email'
     const fields = (this?.query?.fields as string)?.split(',')?.join(' ') || '-v'; //formatting
