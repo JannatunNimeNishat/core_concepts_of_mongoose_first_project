@@ -10,3 +10,5 @@ export const bloodGroup:TBloodGroup[] = ['A+',
 'O-',]
 
 export const Gender:TGender[] = ['male','female','others']
+
+export  const facultySearchableFields = ['email', 'name.firstName', 'presentAddress'];
