@@ -1,6 +1,6 @@
 import { Types } from "mongoose"
 
-export type TName ={
+export type TAname ={
     firstName:string;
     middleName?:string;
     lastName:string;
@@ -13,7 +13,7 @@ export type TAdmin = {
     id:string;
     user:Types.ObjectId;
     designation:string;
-    name: TName;
+    name: TAname;
     gender:TGender;
     dateOfBirth:string;
     email:string;
