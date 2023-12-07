@@ -49,13 +49,14 @@ const updateSingleFacultyFromDB =async (id:string, payload:Partial<TFaculty>) =>
 
 const deleteSingleFacultyFromDB =async (id:string) => {
     const session = await startSession();
-    console.log(id);
+    
     try {
         session.startTransaction();
         const deletedFaculty = await Faculty.findOneAndUpdate({id:id},{isDeleted:true},{new:true,session});
         if(!deletedFaculty){
             throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete faculty')
         }
+        
         const deleteUser = await User.findOneAndUpdate({id:id},{isDeleted:true},{new:true, session});
         if(!deleteUser){
             throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete user')
