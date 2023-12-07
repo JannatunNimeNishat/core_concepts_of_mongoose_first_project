@@ -1,7 +1,7 @@
 import { Types } from "mongoose"
 
 export type TAname ={
-    firstName:string;
+    firstName:string; 
     middleName?:string;
     lastName:string;
 }

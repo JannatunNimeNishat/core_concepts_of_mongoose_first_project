@@ -3,7 +3,7 @@ import { TAdmin, TAname } from './admin.interface';
 import { bloodGroup } from './admin.contant';
 
 const adminNameSchema = new Schema<TAname>({
-  firstName: {
+  firstName: { 
     type: String,
     required: [true, 'firstName is required'],
     trim: true,

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { bloodGroup, gender } from "./admin.contant";
 
 const createAdminNameValidationSchema = z.object({
-    fistName:z.string({
+    firstName:z.string({
         invalid_type_error:'must be string',
         required_error:' field is required'
     }),
@@ -15,7 +15,7 @@ const createAdminNameValidationSchema = z.object({
     }),
 })
 const updateAdminNameValidationSchema = z.object({
-    fistName:z.string({
+    firstName:z.string({
         invalid_type_error:'must be string',
         required_error:' field is required'
     }).optional(),
@@ -39,7 +39,7 @@ const createAdminValidationSchema = z.object({
                 invalid_type_error:'must be string',
                 required_error:' field is required'
             }),
-            name:adminNameValidationSchema,
+            name:createAdminNameValidationSchema,
             gender:z.enum([...gender] as [string, ...string[]]),
             dateOfBirth:z.string({
                 invalid_type_error:'must be string',
@@ -75,7 +75,7 @@ const updateAdminValidationSchema = z.object({
                 invalid_type_error:'must be string',
                 required_error:' field is required'
             }).optional(),
-            name:adminNameValidationSchema.optional(),
+            name:updateAdminNameValidationSchema.optional(),
             gender:z.enum([...gender] as [string, ...string[]]),
             dateOfBirth:z.string({
                 invalid_type_error:'must be string',
@@ -105,8 +105,6 @@ const updateAdminValidationSchema = z.object({
 
 
 export const adminValidation = {
-    createAdminNameValidationSchema,
-    updateAdminNameValidationSchema,
     createAdminValidationSchema,
     updateAdminValidationSchema
 }

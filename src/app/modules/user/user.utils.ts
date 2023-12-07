@@ -82,8 +82,10 @@ const findLastFacultyId = async () => {
       id: 1,
       _id: 0,
     },
-  ).sort({createdAt:-1}).lean();
-  
+  )
+    .sort({ createdAt: -1 })
+    .lean();
+
   return lastFaculty?.id ? lastFaculty?.id : undefined;
 };
 
@@ -91,12 +93,38 @@ export const generateFacultyId = async () => {
   let currentId = (0).toString();
   const facultyId = await findLastFacultyId();
   //console.log(facultyId);
-  if(facultyId){
-      currentId = facultyId.substring(2);
-     // console.log(currentId); 
+  if (facultyId) {
+    currentId = facultyId.substring(2);
+    // console.log(currentId);
   }
-  const currentFacultyId = (Number(currentId)+1).toString().padStart(4,'0');
+  const currentFacultyId = (Number(currentId) + 1).toString().padStart(4, '0');
   //console.log(currentFacultyId);
   const finalFacultyId = `F-${currentFacultyId}`;
   return finalFacultyId;
+};
+
+const findLastAdminId = async () => {
+  const lastAdmin = await User.findOne(
+    {
+      role: 'admin',
+    },
+    {
+      id: 1,
+      _id: 0,
+    },
+  )
+    .sort({ createdAt: -1 })
+    .lean();
+  return lastAdmin?.id ? lastAdmin?.id : undefined;
+};
+
+export const generateAdminId = async () => {
+  let currentId = (0).toString();
+  const previousAdminId = await findLastAdminId();
+  if (previousAdminId) {
+    currentId = previousAdminId.substring(2);
+  }
+  const currentAdminId = (Number(currentId) + 1).toString().padStart(4, '0');
+  const finalAdminId = `A-${currentAdminId}`;
+  return finalAdminId;
 };
