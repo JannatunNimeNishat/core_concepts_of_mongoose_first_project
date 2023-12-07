@@ -20,10 +20,14 @@ const getAllFacultyFromDB = async (query:Record<string, unknown>)=>{
     return result;
 }
 
-
+const getSingleFacultyFromDB =async (id:string) => {
+    const result = await Faculty.findOne({id:id});
+    return result;
+}
 
 
 
 export const facultyServices = {
-    getAllFacultyFromDB
+    getAllFacultyFromDB,
+    getSingleFacultyFromDB
 }

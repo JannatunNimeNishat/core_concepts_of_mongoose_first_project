@@ -5,7 +5,6 @@ import { facultyServices } from "./faculty.service";
 
 const getAllFaculty = catchAsync(async (req,res)=>{
     const result = await facultyServices.getAllFacultyFromDB(req.query);
-    console.log(result);
     sendResponse(res,{
         success:true,
         statusCode:httpStatus.OK,
@@ -14,9 +13,20 @@ const getAllFaculty = catchAsync(async (req,res)=>{
     })
 })
 
+const getSingleFaculty = catchAsync(async(req,res)=>{
+    const facultyId = req.params.facultyId;
+    const result = await facultyServices.getSingleFacultyFromDB(facultyId);
+    sendResponse(res,{
+        success:true,
+        statusCode:httpStatus.OK,
+        message:'Single Faculty Successfully Fetched',
+        data:result,
+    })
+})
 
 
 
 export const facultyControllers = {
-    getAllFaculty
+    getAllFaculty,
+    getSingleFaculty
 }
