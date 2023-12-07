@@ -9,5 +9,6 @@ router.get('/',facultyControllers.getAllFaculty)
 router.get('/:facultyId',facultyControllers.getSingleFaculty)
 router.patch('/:facultyId',validateRequest(facultyValidations.updateFacultyValidationSchema),facultyControllers.updateSingleFaculty)
 
+router.delete('/:facultyId',facultyControllers.deleteSingleFaculty)
 
 export const facultyRoutes = router;
