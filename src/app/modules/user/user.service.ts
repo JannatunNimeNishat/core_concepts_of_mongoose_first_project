@@ -70,7 +70,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     await session.endSession();
 
     return newStudent;
-  } catch (error:any) {
+  } catch (error: any) {
     //s8 -> is anything goes wrong. abort Transaction and end session
     await session.abortTransaction();
     await session.endSession();
@@ -81,26 +81,37 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   //return newUser;
 };
 
-const createFacultyIntoDB = async(password:string, payload:TFaculty)=>{
-
-  const userData:Partial<TUser> = {};
+const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
+  const userData: Partial<TUser> = {};
   userData.password = password || (config.default_password as string);
   userData.role = 'faculty';
 
-  userData.id = await generateFacultyId();
+  const session = await startSession();
+  try {
+    session.startTransaction();
+    userData.id = await generateFacultyId();
+    const newUser = await User.create([userData], { session });
 
-  const newUser = await User.create(userData);
-
-  if(Object.keys(newUser).length){
-    payload.id = newUser?.id;
-    payload.user = newUser?._id;
-   const newFaculty = await Faculty.create(payload);
+    if (!newUser.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
+    }
+    payload.id = newUser[0]?.id;
+    payload.user = newUser[0]?._id;
+    const newFaculty = await Faculty.create([payload], { session });
+    if (!newFaculty.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create faculty');
+    }
+    await session.commitTransaction();
+    await session.endSession();
     return newFaculty;
+  } catch (error:any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error)
   }
-
-}
+};
 
 export const UserServices = {
   createStudentIntoDB,
-  createFacultyIntoDB
+  createFacultyIntoDB,
 };
