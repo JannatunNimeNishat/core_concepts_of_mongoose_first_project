@@ -21,7 +21,7 @@ const updateFacultyNameValidationSchema = z.object({
   firstName: z.string({
     invalid_type_error: 'must be an string',
     required_error: 'firstName is required',
-  }),
+  }).optional(),
   middleName: z
     .string({
       invalid_type_error: 'must be a string',
@@ -30,7 +30,7 @@ const updateFacultyNameValidationSchema = z.object({
   lastName: z.string({
     invalid_type_error: 'must be a string',
     required_error: 'lastName is required',
-  }),
+  }).optional(),
 });
 
 const createFacultyValidationSchema = z.object({
