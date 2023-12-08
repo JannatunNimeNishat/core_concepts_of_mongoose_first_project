@@ -6,9 +6,9 @@ import { facultyValidations } from "./faculty.validation";
 const router = Router();
 
 router.get('/',facultyControllers.getAllFaculty)
-router.get('/:facultyId',facultyControllers.getSingleFaculty)
-router.patch('/:facultyId',validateRequest(facultyValidations.updateFacultyValidationSchema),facultyControllers.updateSingleFaculty)
+router.get('/:id',facultyControllers.getSingleFaculty)
+router.patch('/:id',validateRequest(facultyValidations.updateFacultyValidationSchema),facultyControllers.updateSingleFaculty)
 
-router.delete('/:facultyId',facultyControllers.deleteSingleFaculty)
+router.delete('/:id',facultyControllers.deleteSingleFaculty)
 
 export const facultyRoutes = router;
