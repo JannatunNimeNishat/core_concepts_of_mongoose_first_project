@@ -1,7 +1,8 @@
+import { TCourse } from './course.interface';
 import { Course } from './course.model';
 
-const createCourseIntoDB = async () => {
-  const result = await Course.create();
+const createCourseIntoDB = async (payload:TCourse) => {
+  const result = await Course.create(payload);
   return result;
 };
 
