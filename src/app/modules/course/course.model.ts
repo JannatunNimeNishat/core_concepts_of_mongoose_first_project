@@ -11,6 +11,7 @@ const courseSchema = new Schema<TCourse>({
     prefix:{type:String,trim:true, required:true},
     code:{type:Number,trim:true, required:true},
     credit:{type:Number,trim:true, required:true},
+    isDeleted:{type:Boolean, default:false},
     preRequisiteCourses:[preRequisiteCoursesSchema],
 })
 

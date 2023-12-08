@@ -24,6 +24,7 @@ const createCourseValidationSchema = z.object({
         invalid_type_error:'must me a number',
         required_error:'required filed'
     }),
+    isDeleted:z.boolean().optional(),
     preRequisiteCourses:z.array(preRequisiteCoursesValidationSchema).optional()
     })
 })
@@ -32,6 +33,7 @@ const updatePreRequisiteCoursesValidationSchema =z.object({
     isDeleted:z.boolean().optional()
 })
 
+//const updateCourseValidationSchema = createCourseValidationSchema.partial(); //partial makes all the property optional 
 
 const updateCourseValidationSchema = z.object({
     body:z.object({
@@ -51,6 +53,7 @@ const updateCourseValidationSchema = z.object({
         invalid_type_error:'must me a number',
         required_error:'required filed'
     }).optional(),
+    isDeleted:z.boolean().optional(),
     preRequisiteCourses:z.array(updatePreRequisiteCoursesValidationSchema).optional()
     })
 })

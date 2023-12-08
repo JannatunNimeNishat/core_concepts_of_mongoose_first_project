@@ -3,28 +3,85 @@ import { CourseSearchableFields } from './course.constant';
 import { TCourse } from './course.interface';
 import { Course } from './course.model';
 
-const createCourseIntoDB = async (payload:TCourse) => {
+const createCourseIntoDB = async (payload: TCourse) => {
   const result = await Course.create(payload);
   return result;
 };
 
-const getAllCoursesFromDB = async (query:Record<string,unknown>) => {
-  const courseQueryBuilder = new QueryBuilder(Course.find().populate('preRequisiteCourses.course'),query)
-  .search(CourseSearchableFields)
-  .filter()
-  .sort()
-  .paginate()
-  .fields();
+const getAllCoursesFromDB = async (query: Record<string, unknown>) => {
+  const courseQueryBuilder = new QueryBuilder(
+    Course.find().populate('preRequisiteCourses.course'),
+    query,
+  )
+    .search(CourseSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
   const result = await courseQueryBuilder.modelQuery;
   return result;
 };
 
 const getSingleCourseFromDB = async (id: string) => {
-  const result = await Course.findById(id).populate('preRequisiteCourses.course');
+  const result = await Course.findById(id).populate(
+    'preRequisiteCourses.course',
+  );
   return result;
 };
+
+const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
+  /*NOTE: preRequisiteCourse ar normal info ke alada kore fela hosce. 
+// i.preRequisiteCourse er modde 2 ta kaj hobe. jodi input teka isDelete= false ase taile amader oi course ta ke preRequisiteCourse array te add korte hobe. r isDelete = true asle preRequisiteCourse array teka remove korte hobe.
+// ii. courseRemainingData gula normal update er moto kore update hobe
+*/
+  const { preRequisiteCourses, ...courseRemainingData } = payload;
+  //step1: basic course info update
+  const updatedBasicCourseInfo = await Course.findByIdAndUpdate(
+    id,
+    courseRemainingData,
+    { new: true, runValidators: true },
+  );
+
+  //step 2 -> check if there is any pre preRequisiteCourses to update. if yes then pull them out from the preRequisiteCourses array
+  if (preRequisiteCourses && preRequisiteCourses.length > 0) {
+    //je field gula delete hobe se gula filter out kora hosce
+    const deletedPreRequisites = preRequisiteCourses
+      ?.filter((el) => el.course && el.isDeleted === true)
+      .map((el) => el.course); // '65730955fcb1072d57d2e411'
+    // console.log('deletedPreRequisites: ',deletedPreRequisites);
+    const deletedPreRequisitesCourses = await Course.findByIdAndUpdate(id, {
+      $pull: { preRequisiteCourses: { course: { $in: deletedPreRequisites } } },
+    });
+
+    //step 3 -> je incoming preRequisiteCourses ar  isDeleted = false ase oigula filter kore. preRequisiteCourses array ta add kore felte hobe.
+  const newPreRequisites = preRequisiteCourses?.filter(
+    (el) => el.course && el.isDeleted === false,
+  );
+  //console.log({newPreRequisites});
+  const newPreRequisitesCourses = await Course.findByIdAndUpdate(id, {
+    $addToSet: {
+      // addToSet sudu incoming changed fields gula update kore baki gula as it is rekha dey
+      preRequisiteCourses: { $each: newPreRequisites },
+    },
+  });
+  }
+
+  const result = await Course.findById(id).populate('preRequisiteCourses.course'); // populate to see the updated preRequisiteCourses and normal data
+  
+  return {
+    result
+   /*  updatedBasicCourseInfo,
+    deletedPreRequisitesCourses,
+    newPreRequisitesCourses, */
+  };
+};
+
 const deleteCourseFromDB = async (id: string) => {
-  const result = await Course.findByIdAndUpdate(id,{isDeleted:true},{new:true});
+  const result = await Course.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  );
   return result;
 };
 
@@ -32,5 +89,6 @@ export const courseServices = {
   createCourseIntoDB,
   getAllCoursesFromDB,
   getSingleCourseFromDB,
-  deleteCourseFromDB
+  updateCourseIntoDB,
+  deleteCourseFromDB,
 };

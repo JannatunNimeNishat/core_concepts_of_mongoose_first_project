@@ -16,7 +16,7 @@ router.post(
 router.get('/',CourseControllers.getAllCourses);
 
 router.get('/:id',CourseControllers.getSingleCourse)
-// router.patch('/:id',validateRequest(courseValidation.updateCourseValidationSchema),)
+router.patch('/:id',validateRequest(courseValidation.updateCourseValidationSchema),CourseControllers.updateCourse)
 
 router.delete('/:id',CourseControllers.deleteCourse)
 
