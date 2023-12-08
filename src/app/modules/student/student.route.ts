@@ -8,10 +8,10 @@ const router = express.Router();
 
 
 router.get('/', StudentControllers.getStudents);
+//we are using mongodb _id here instead of our generated id 
+router.get('/:id', StudentControllers.getSingleStudent);
+router.patch('/:id',validateRequest(studentValidations.updateStudentValidationSchema) ,StudentControllers.updateStudent);
 
-router.get('/:studentId', StudentControllers.getSingleStudent);
-router.patch('/:studentId',validateRequest(studentValidations.updateStudentValidationSchema) ,StudentControllers.updateStudent);
-
-router.delete('/:studentId', StudentControllers.deleteStudent);
+router.delete('/:id', StudentControllers.deleteStudent);
 
 export const studentRoutes = router;

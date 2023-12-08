@@ -124,7 +124,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleStudentFormDB = async (id: string) => {
-  const result = await Student.findOne({ id: id })
+  const result = await Student.findById(id)
     .populate('user')
     .populate('admissionSemester')
     .populate({
@@ -174,8 +174,8 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
 
 
 
-  const result = await Student.findOneAndUpdate(
-    { id: id },
+  const result = await Student.findByIdAndUpdate(
+    id,
     modifiedUpdatedData,
     { new: true, runValidators: true },
   );
@@ -192,8 +192,8 @@ const deleteStudentFromDB = async (id: string) => {
     //->deleting student (transaction-1)
 
     //amra amader created kora id deya delete korte casci ti findOneAndUpdate use korte hobe. mongoose er _id deya korte cile amra findById korte partam
-    const deletedStudent = await Student.findOneAndUpdate(
-      { id: id },
+    const deletedStudent = await Student.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -201,10 +201,12 @@ const deleteStudentFromDB = async (id: string) => {
     if (!deletedStudent) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
     }
+    //getting the users _id from student collection as it is referenced
+    const userId = deletedStudent.user;
 
     //-> deleting user (transaction-2)
     const deletedUser = await User.findOneAndUpdate(
-      { id: id },
+      userId,
       { isDeleted: true },
       { new: true, session },
     );

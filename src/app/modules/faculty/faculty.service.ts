@@ -32,7 +32,7 @@ const updateSingleFacultyFromDB = async (
   id: string,
   payload: Partial<TFaculty>,
 ) => {
-    console.log(id);
+    
   //separate payloads -> primitive and non-primitive data
   const { name, ...remainingFacultyData } = payload;
   const modifiedUpdatedData: Record<string, unknown> = {
