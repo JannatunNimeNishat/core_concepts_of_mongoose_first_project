@@ -24,7 +24,7 @@ const createCourseValidationSchema = z.object({
         invalid_type_error:'must me a number',
         required_error:'required filed'
     }),
-    preRequisiteCourses:z.array(preRequisiteCoursesValidationSchema)
+    preRequisiteCourses:z.array(preRequisiteCoursesValidationSchema).optional()
     })
 })
 const updatePreRequisiteCoursesValidationSchema =z.object({
@@ -55,7 +55,7 @@ const updateCourseValidationSchema = z.object({
     })
 })
 
-export const coerceValidation = {
+export const courseValidation = {
     createCourseValidationSchema,
     updateCourseValidationSchema
 }
