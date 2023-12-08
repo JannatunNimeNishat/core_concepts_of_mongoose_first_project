@@ -42,7 +42,7 @@ const createCourse = catchAsync(async (req, res) => {
       
       const deleteCourse = catchAsync(async (req, res) => {
         const { id } = req.params;
-        const result = await courseServices.deleteCourseFromDB(id)
+        const result = await courseServices.deleteCourseFromDB(id as string)
       
         sendResponse(res, {
           statusCode: httpStatus.OK,
