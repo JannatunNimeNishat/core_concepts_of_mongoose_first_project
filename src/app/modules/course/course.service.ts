@@ -1,8 +1,8 @@
 import { startSession } from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { CourseSearchableFields } from './course.constant';
-import { TCourse } from './course.interface';
-import { Course } from './course.model';
+import { TCourse, TCourseFaculty } from './course.interface';
+import { Course, CourseFaculty } from './course.model';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 
@@ -126,10 +126,39 @@ const deleteCourseFromDB = async (id: string) => {
   return result;
 };
 
+// akta course er je je faculty nisce tader courseFaculty collection a add kora hosce 
+const assignFacultiesWithCourseIntoDB = async (id: string, payload:Partial<TCourseFaculty>) => {
+  const result = await CourseFaculty.findByIdAndUpdate(id,
+    {
+      course:id,
+      $addToSet:{faculties:{$each:payload}} // duplicate faculty add korte dibe na. new faculty asle tobai add korbe
+    },{
+      upsert:true,
+      new:true
+    });
+    return result;
+};
+
+
+
+//course teka assigned faculty ke delete kora hosce
+const removeFacultiesFromCourseFromDB = async (id: string, payload:Partial<TCourseFaculty>) => {
+  const result = await CourseFaculty.findByIdAndUpdate(id,
+    {
+      $pull:{faculties: {$in: payload}},
+    },{
+      new:true
+    });
+    return result;
+};
+
+
 export const courseServices = {
   createCourseIntoDB,
   getAllCoursesFromDB,
   getSingleCourseFromDB,
   updateCourseIntoDB,
   deleteCourseFromDB,
+ assignFacultiesWithCourseIntoDB,
+ removeFacultiesFromCourseFromDB
 };
