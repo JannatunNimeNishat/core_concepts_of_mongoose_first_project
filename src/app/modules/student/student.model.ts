@@ -203,7 +203,7 @@ studentSchema.pre('find', async function (next) {
   this.find({ isDeleted: { $ne: true } }); // gives all the documents except the deleted one. here isDeled === false
   next();
 });
-
+  
 //-> findOne
 studentSchema.pre('findOne', async function (next) {
   this.find({ isDeleted: { $ne: true } }); // gives only one document which here isDeled === false
