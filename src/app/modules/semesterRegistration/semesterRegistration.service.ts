@@ -10,7 +10,21 @@ const createSemesterRegistrationIntoDB = async (
 ) => {
   const academicSemester = payload?.academicSemester;
 
-  //check 1-> if the academicSemester is exist on  academicSemester model
+  //check 1-> jodi 'UPCOMING' othoba 'ONGOING ' kono semesterRegistration already take taile r new kore kono createSemesterRegistration korte dibo na.
+  const isThereAnyUpComingOrOngoingSemester =
+    await SemesterRegistration.findOne({
+      $or: [{ status: 'UPCOMING' }, { status: 'ONGOING' }],
+    });
+
+    if(isThereAnyUpComingOrOngoingSemester){
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `There is already a ${isThereAnyUpComingOrOngoingSemester.status} registered semester!`,
+          );
+    }
+
+
+  //check 2-> if the academicSemester is exist on  academicSemester model
   const isAcademicSemesterExists =
     await AcademicSemester.findById(academicSemester); // objectId -> _id asbe ti direct likha jasce
 
@@ -25,7 +39,7 @@ const createSemesterRegistrationIntoDB = async (
     academicSemester,
   });
 
-  //check 2-> if the semester is already registered . semesterRegistration age hoyce ki na. hoyle r register kora jabe na.
+  //check 3-> if the semester is already registered . semesterRegistration age hoyce ki na. hoyle r register kora jabe na.
   if (isSemesterRegistrationExists) {
     throw new AppError(
       httpStatus.CONFLICT,
@@ -53,15 +67,19 @@ const getAllSemesterRegistrationFromDB = async (
   return result;
 };
 
+const getSingleSemesterRegistrationFromDB = async (id: string) => {
+  const result = await SemesterRegistration.findById(id);
+  return result;
+};
 
-const getSingleSemesterRegistrationFromDB =async (id:string) => {
-    const result = await SemesterRegistration.findById(id);
-    return result;
-}
-
+const updateSemesterRegistrationIntoDB = async (
+  id: string,
+  payload: Partial<TSemesterRegistration>,
+) => {};
 
 export const SemesterRegistrationServices = {
   createSemesterRegistrationIntoDB,
   getAllSemesterRegistrationFromDB,
-  getSingleSemesterRegistrationFromDB
+  getSingleSemesterRegistrationFromDB,
+  updateSemesterRegistrationIntoDB,
 };
