@@ -25,7 +25,7 @@ router.delete('/:id',CourseControllers.deleteCourse)
 router.put('/:courseId/assign-faculties',validateRequest(courseValidation.facultiesWithCourseValidationSchema),CourseControllers.assignFacultiesWithCourse) 
 
 //course teka assigned faculty ke delete kora r route
-router.put('/:courseId/remove-faculties',validateRequest(courseValidation.facultiesWithCourseValidationSchema),CourseControllers.removeFacultiesFromCourse) 
+router.delete('/:courseId/remove-faculties',validateRequest(courseValidation.facultiesWithCourseValidationSchema),CourseControllers.removeFacultiesFromCourse) 
 
 
 

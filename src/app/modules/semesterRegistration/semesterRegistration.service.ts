@@ -16,13 +16,12 @@ const createSemesterRegistrationIntoDB = async (
       $or: [{ status: 'UPCOMING' }, { status: 'ONGOING' }],
     });
 
-    if(isThereAnyUpComingOrOngoingSemester){
-        throw new AppError(
-            httpStatus.BAD_REQUEST,
-            `There is already a ${isThereAnyUpComingOrOngoingSemester.status} registered semester!`,
-          );
-    }
-
+  if (isThereAnyUpComingOrOngoingSemester) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `There is already a ${isThereAnyUpComingOrOngoingSemester.status} registered semester!`,
+    );
+  }
 
   //check 2-> if the academicSemester is exist on  academicSemester model
   const isAcademicSemesterExists =
@@ -75,7 +74,57 @@ const getSingleSemesterRegistrationFromDB = async (id: string) => {
 const updateSemesterRegistrationIntoDB = async (
   id: string,
   payload: Partial<TSemesterRegistration>,
-) => {};
+) => {
+
+    //check 1-> je registered semester update korte casci saita exist kore ki na 
+    const isSemesterRegistrationExists = await SemesterRegistration.findById(id);
+    if(!isSemesterRegistrationExists){
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `This semester is not found!`,
+          );
+    }
+
+
+    //check 2-> amra je semester registration update korte casci setar status jodi ENDED hoye jai, tokon we wil not update anything
+   const currentSemesterStatus =isSemesterRegistrationExists?.status;
+
+    if(currentSemesterStatus === 'ENDED'){
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `This semester is already ${currentSemesterStatus}`,
+          );
+    }
+
+    // 3: UPCOMING --> ONGOING --> ENDED 
+    //amra ei sequence ta follow korbo UPCOMING teka  --> ONGOING korte parbe --> ENDED korte parbe. but ended teka ongoing ba upcoming korte parbe na. mane sudu samner dik e jabe picone asa possible na
+
+    const requiredStatus = payload?.status;
+
+    //3.1: (UPCOMING --> ENDED not possible)     currentSemesterStatus jeiata database e acon ase, abong jaita amra input e patasci sai 2 ta forward hote hobe, abar skip kore porer ta tao jeta parbe na. 
+    if(currentSemesterStatus === 'UPCOMING' && requiredStatus === 'ENDED'){ // acan e amra upcoming teka ongoing korte parbo but input e ended asteca so korte dibo na.
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `You can not directly change status from ${currentSemesterStatus} to ${requiredStatus}`,
+          );
+    }
+
+
+    //3.2: (ONGOING --> UPCOMING not possible)
+    if(currentSemesterStatus === 'ONGOING' && requiredStatus === 'UPCOMING'){ // piconer dik ao aste parbo na
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `You can not directly change status from ${currentSemesterStatus} to ${requiredStatus}`,
+          );
+    }
+
+    //4: now we can let it to update the registeredSemester
+    const result = await SemesterRegistration.findByIdAndUpdate(id, payload,{new:true, runValidators:true})
+
+    return result;
+
+
+};
 
 export const SemesterRegistrationServices = {
   createSemesterRegistrationIntoDB,
