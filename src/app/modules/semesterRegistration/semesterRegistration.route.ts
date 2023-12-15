@@ -7,8 +7,10 @@ const router = Router();
 
 
 
-router.post('/create-semester-registration', validateRequest(SemesterRegistrationValidation.createSemesterRegistrationValidationSchema),SemesterRegistrationControllers.createSemesterRegistration)
+router.post('/create-semester-registration', validateRequest(SemesterRegistrationValidation.createSemesterRegistrationValidationSchema),SemesterRegistrationControllers.createSemesterRegistration);
 
+router.get('/',SemesterRegistrationControllers.getAllSemesterRegistration);
+router.get('/:id',SemesterRegistrationControllers.getSingleSemesterRegistration);
 
 
 
