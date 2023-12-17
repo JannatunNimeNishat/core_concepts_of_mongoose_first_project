@@ -8,6 +8,7 @@ const router = Router();
 router.post('/create-offered-course', validateRequest(offeredCourseValidations.createOfferedCourseValidationSchema),OfferedCourseControllers.createOfferCourse);
 
 
+router.patch('/:id',validateRequest(offeredCourseValidations.updateOfferedCourseValidationSchema),OfferedCourseControllers.updateOfferCourse)
 
 
 

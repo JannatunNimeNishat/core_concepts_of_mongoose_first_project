@@ -6,32 +6,32 @@ const offeredCourseSchema = new Schema<TOfferedCourse>({
     semesterRegistration:{
         type:Schema.Types.ObjectId,
         required:true,
-        red:'SemesterRegistration'
+        ref:'SemesterRegistration'
     } ,
     academicSemester:{
         type:Schema.Types.ObjectId,
         required:true,
-        red:'AcademicSemester'
+        ref:'AcademicSemester'
     } ,
     academicFaculty:{
         type:Schema.Types.ObjectId,
         required:true,
-        red:'AcademicFaculty'
+        ref:'AcademicFaculty'
     } ,
     academicDepartment:{
         type:Schema.Types.ObjectId,
         required:true,
-        red:'AcademicDepartment'
+        ref:'AcademicDepartment'
     } ,
     course:{
         type:Schema.Types.ObjectId,
         required:true,
-        red:'Course'
+        ref:'Course'
     } ,
     faculty:{
         type:Schema.Types.ObjectId,
         required:true,
-        red:'Faculty'
+        ref:'Faculty'
     } ,
     maxCapacity:{
         type:Number,

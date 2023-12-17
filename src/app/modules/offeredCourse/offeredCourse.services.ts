@@ -23,6 +23,19 @@ const createOfferCourseIntoDB = async (payload: TOfferedCourse) => {
     endTime
   } = payload;
 
+  /**
+   * Step 1: check if the semester registration id is exists!
+   * Step 2: check if the academic faculty id is exists!
+   * Step 3: check if the academic department id is exists!
+   * Step 4: check if the course id is exists!
+   * Step 5: check if the faculty id is exists!
+   * Step 6: check if the department is belong to the  faculty
+   * Step 7: check if the same offered course same section in same registered semester exists
+   * Step 8: get the schedules of the faculties
+   * Step 9: check if the faculty is available at that time. If not then throw error
+   * Step 10: create the offered course
+   */
+
   const isSemesterRegistrationExists = await SemesterRegistration.findById(semesterRegistration);
   if(!isSemesterRegistrationExists){
     throw new AppError(httpStatus.NOT_FOUND, 'Semester registration not found');
@@ -128,6 +141,67 @@ assignedSchedules.forEach((schedule)=>{
   //return null;
 };
 
+
+const updateOfferCourseIntoDB = async (id:string, payload:Pick<TOfferedCourse, 'faculty'|'days'|'startTime'|'endTime'>) =>{
+    const {faculty,days, startTime,endTime} = payload;
+    // check 1: offeredCourse jeta update kortecasci saita exists kore ki na
+    const isOfferedCourseExists = await OfferedCourse.findById(id);
+    if(!isOfferedCourseExists){
+      throw new AppError(httpStatus.NOT_FOUND, 'OfferedCourse not found');
+    }
+
+    //check 2: semesterRegistration jeita input e asteca oitar status jodi UPCOMING take tokon e sudhu update korte dibo. ONGOIN ba ENDED status hole dibo na
+    
+    const semesterRegistrationId = isOfferedCourseExists?.semesterRegistration;
+    const SemesterRegistrationStatus = await SemesterRegistration.findById(semesterRegistrationId);
+    if(SemesterRegistrationStatus?.status !== 'UPCOMING'){
+        throw new AppError(httpStatus.BAD_REQUEST, `You can not update this offered course as it is ${SemesterRegistrationStatus?.status}`);
+    }
+
+
+
+    // check 3: incoming faculty jeita asbe oita Faculty collection a exists kore ki na. faculty na amon kauke amra db te rakbo na.
+   
+    const isFacultyExists = await Faculty.findById(faculty); // faculty ObjectId -> _id
+    if(!isFacultyExists){
+        throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found');
+      }
+
+    //check 4: je time and days asbe oigula age teka assign kora kono time days sate conflict kore ki na saita check korte hobe amader utils e rakha hasTimeConflict function deya. 
+
+      const semesterRegistration = isOfferedCourseExists?.semesterRegistration;
+
+    const assignedSchedules = await OfferedCourse.find({
+        semesterRegistration:semesterRegistration,
+        faculty:faculty,
+        days:{$in:days}
+     }).select('days startTime endTime');
+
+    
+    //input e je days, startTime, endTime asteca saita neya newSchedule object create hosce
+     const newSchedule = {
+        days:days,//input teka asha days
+        startTime:startTime, // input teka asha startTime
+        endTime:endTime, // input teka asha endTime
+     }
+
+      //checking is there any conflict
+
+ if(hasTimeConflict(assignedSchedules,newSchedule)){
+    throw new AppError(
+        httpStatus.CONFLICT,
+        `This faculty is not available at that time! Choose other time or day`,
+      );
+ }
+
+ const result = await OfferedCourse.findByIdAndUpdate(id,payload, {new:true});
+ return result;
+
+    
+
+}
+
 export const OfferedCourseServices = {
   createOfferCourseIntoDB,
+  updateOfferCourseIntoDB
 };
