@@ -35,11 +35,11 @@ const createSemesterRegistrationIntoDB = async (
     );
   }
 
+  //check 3-> if the semester is already registered . semesterRegistration age hoyce ki na. hoyle r register kora jabe na.
   const isSemesterRegistrationExists = await SemesterRegistration.findOne({
     academicSemester,
   });
 
-  //check 3-> if the semester is already registered . semesterRegistration age hoyce ki na. hoyle r register kora jabe na.
   if (isSemesterRegistrationExists) {
     throw new AppError(
       httpStatus.CONFLICT,
