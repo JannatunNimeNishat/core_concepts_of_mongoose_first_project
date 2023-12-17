@@ -10,7 +10,7 @@ export type TOfferedCourse = {
     academicDepartment : Types.ObjectId;
     course : Types.ObjectId;
     faculty : Types.ObjectId;
-    maxCapacity : Types.ObjectId;
+    maxCapacity : number;
     section : number;
     days: Days;
     startTime: string;
