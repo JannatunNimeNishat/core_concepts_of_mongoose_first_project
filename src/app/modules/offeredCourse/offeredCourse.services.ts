@@ -35,28 +35,30 @@ const createOfferCourseIntoDB = async (payload: TOfferedCourse) => {
    * Step 9: check if the faculty is available at that time. If not then throw error
    * Step 10: create the offered course
    */
-
+//check 1.1
   const isSemesterRegistrationExists = await SemesterRegistration.findById(semesterRegistration);
   if(!isSemesterRegistrationExists){
     throw new AppError(httpStatus.NOT_FOUND, 'Semester registration not found');
   }
-
-  //check 1.1: getting the academicSemester from SemesterRegistration
+  
+  //check 1.2: getting the academicSemester from SemesterRegistration
   const academicSemester = isSemesterRegistrationExists.academicSemester;
 
   const isAcademicFacultyExists = await AcademicFaculty.findById(academicFaculty);
   if(!isAcademicFacultyExists){
     throw new AppError(httpStatus.NOT_FOUND, 'AcademicFaculty not found');
   }
+  //check 1.3:
   const isAcademicDepartmentExists = await AcademicDepartment.findById(academicDepartment);
   if(!isAcademicDepartmentExists){
     throw new AppError(httpStatus.NOT_FOUND, 'AcademicDepartment not found');
   }
-
+  //check 1.4:
   const isCourseExists = await Course.findById(course);
   if(!isCourseExists){
     throw new AppError(httpStatus.NOT_FOUND, 'Course not found');
   }
+  //check 1.5:
   const isFacultyExists = await Faculty.findById(faculty);
   if(!isFacultyExists){
     throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found');
@@ -100,14 +102,14 @@ const createOfferCourseIntoDB = async (payload: TOfferedCourse) => {
  }).select('days startTime endTime');
 //console.log(assignedSchedules);
 
-//input e je days, startTime, endTime asteca saita neya newSchedule object create hosce
+//4.2: input e je days, startTime, endTime asteca saita neya newSchedule object create hosce
  const newSchedule = {
     days:days,//input teka asha days
     startTime:startTime, // input teka asha startTime
     endTime:endTime, // input teka asha endTime
  }
 
- //checking is there any conflict
+ //4.3: checking is there any conflict
 
  if(hasTimeConflict(assignedSchedules,newSchedule)){
     throw new AppError(
