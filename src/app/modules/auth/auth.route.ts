@@ -3,9 +3,10 @@ import validateRequest from "../../middlwares/validateRequest";
 import { AuthValidation } from "./auth.validation";
 import { AuthController } from "./auth.controller";
 
+
 const router = Router();
 
-router.post('/login', validateRequest(AuthValidation.loginValidationSchema),AuthController.loginUser)
+router.post('/login',validateRequest(AuthValidation.loginValidationSchema),AuthController.loginUser)
 
 
 
