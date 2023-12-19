@@ -57,7 +57,7 @@ const loginUser = async (payload: TLoginUser) => {
   // step 5.2: create accessToken and send to the user
   const jwtPayload = { // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
     userId:isUserExists?.id,
-    roll:isUserExists?.role
+    role:isUserExists?.role
   }
   const accessToken =  jwt.sign(jwtPayload,config.jwt_access_secret as string,{ expiresIn: '10d' });
   

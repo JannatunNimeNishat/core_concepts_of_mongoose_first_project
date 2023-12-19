@@ -12,6 +12,7 @@ const userSchema = new Schema<TUser,UserModel>(
     password: {
       type: String,
       required: true,
+      select:0, // this select 0 will prevent this password field to find 
     },
     needsPasswordChange: {
       type: Boolean,
