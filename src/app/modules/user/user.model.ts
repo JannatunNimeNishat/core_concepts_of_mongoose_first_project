@@ -18,6 +18,9 @@ const userSchema = new Schema<TUser,UserModel>(
       type: Boolean,
       default: true,
     },
+    passwordChangeAt:{ //// password kun specific time e change hosce tar time
+      type:Date
+    },
     role: {
       type: String,
       enum: ['student', 'faculty', 'admin'],
@@ -58,7 +61,7 @@ userSchema.pre('save', async function (next) {
 
 //Auth validation static methods
 userSchema.statics.isUserExistsByCustomId = async function (id:string) {
-  const user = await User.findOne({id:id});
+  const user = await User.findOne({id:id}).select("+password"); // select na korle password pabe na karon amra model e select 0 kore rakci. +password mane select 0 kora soho baki sob data dibe. 
   return user;
 }
 

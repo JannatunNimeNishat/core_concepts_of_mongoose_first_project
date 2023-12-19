@@ -2,9 +2,9 @@ import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
-
+import bcrypt from 'bcrypt';
 const loginUser = async (payload: TLoginUser) => {
   /** steps:
    * 1. je id input e asbe oi id r user ase ki na.
@@ -55,18 +55,78 @@ const loginUser = async (payload: TLoginUser) => {
   //step 5.1: npm i jsonwebtoken npm i -D @types/jsonwebtoken
 
   // step 5.2: create accessToken and send to the user
-  const jwtPayload = { // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
-    userId:isUserExists?.id,
-    role:isUserExists?.role
-  }
-  const accessToken =  jwt.sign(jwtPayload,config.jwt_access_secret as string,{ expiresIn: '10d' });
-  
+  const jwtPayload = {
+    // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
+    userId: isUserExists?.id,
+    role: isUserExists?.role,
+  };
+  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: '10d',
+  });
+
   return {
     accessToken,
-    needsPasswordChange:isUserExists?.needsPasswordChange
+    needsPasswordChange: isUserExists?.needsPasswordChange,
   };
+};
+
+const changePasswordIntoDB = async (
+  user: JwtPayload,
+  payload: { oldPassword: string; newPassword: string },
+) => {
+  console.log('user', user);
+  const isUserExists = await User?.isUserExistsByCustomId(user?.userId);
+
+  //step 1: checking is the user is exist
+  if (!isUserExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  //step 2: checking is user is already deleted
+  if (isUserExists?.isDeleted === true) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted!');
+  }
+
+  //step 3: checking is the user is blocked
+  if (isUserExists?.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
+  }
+
+  //step 4: checking the password is correct
+
+  if (
+    !(await User?.isPasswordMatched(
+      payload?.oldPassword,
+      isUserExists?.password,
+    ))
+  ) {
+    //match hole true. r na hole false asbe isPasswordMatched er modde.
+    throw new AppError(httpStatus.FORBIDDEN, 'Wrong password!');
+  }
+
+  //step 5: hashed the newPassword
+  const newHashedPassword = await bcrypt.hash(
+    payload?.newPassword,
+    Number(config.saltRounds),
+  );
+
+  // updating the oldPassword with newPassword
+  await User.findOneAndUpdate(
+    {
+      id: user.userId,
+      role: user.role,
+    },
+    { /**amra acan e 2 ta extra field update korteci. needsPasswordChange eta default pasword change hoyce eta bujar jonno. r passwordChangeAt eta kun specific time/date e password change hoyce seta bujar jonno  */
+      password: newHashedPassword,
+      needsPasswordChange: false,
+      passwordChangeAt: new Date(),
+    },
+  );
+
+  return null;
 };
 
 export const AuthServices = {
   loginUser,
+  changePasswordIntoDB,
 };

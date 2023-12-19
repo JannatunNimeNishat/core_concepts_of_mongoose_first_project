@@ -6,6 +6,7 @@ export interface TUser {
   id: string;
   password: string;
   needsPasswordChange: boolean;
+  passwordChangeAt?:Date; // password kun specific time e change hosce tar time
   role: 'admin' | 'student' | 'faculty';
   status: 'in-progress' | 'blocked';
   isDeleted: boolean;
