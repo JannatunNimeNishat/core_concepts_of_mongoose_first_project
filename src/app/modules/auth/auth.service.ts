@@ -56,20 +56,27 @@ const loginUser = async (payload: TLoginUser) => {
   //step 5:  Access Granted: Send AccessToken, RefreshToken
   //step 5.1: npm i jsonwebtoken npm i -D @types/jsonwebtoken
 
-  // step 5.2: create accessToken 
+  // step 5.2: create accessToken
   const jwtPayload = {
     // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
     userId: isUserExists?.id,
     role: isUserExists?.role,
   };
-  const accessToken = createToken(jwtPayload,config.jwt_access_secret as string,config.jwt_access_expires_in as string);
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
   /* const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
     expiresIn: '10d',
   }); */
-  
-  //step 6: create refresh token
-  const refreshToken = createToken(jwtPayload,config.jwt_refresh_secret as string,config.jwt_refresh_expires_in as string);
 
+  //step 6: create refresh token
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
+  );
 
   // step 7: sending accessToken, refreshToken,needsPasswordChange
   return {
@@ -125,7 +132,8 @@ const changePasswordIntoDB = async (
       id: user.userId,
       role: user.role,
     },
-    { /**amra acan e 2 ta extra field update korteci. needsPasswordChange eta default pasword change hoyce eta bujar jonno. r passwordChangeAt eta kun specific time/date e password change hoyce seta bujar jonno  */
+    {
+      /**amra acan e 2 ta extra field update korteci. needsPasswordChange eta default pasword change hoyce eta bujar jonno. r passwordChangeAt eta kun specific time/date e password change hoyce seta bujar jonno  */
       password: newHashedPassword,
       needsPasswordChange: false,
       passwordChangeAt: new Date(),
@@ -135,7 +143,62 @@ const changePasswordIntoDB = async (
   return null;
 };
 
+const refreshToken = async (token: string) => {
+  //step 1: check is the incoming refresh token is valid or not
+
+  const decoded = jwt.verify(
+    token,
+    config.jwt_refresh_secret as string,
+  ) as JwtPayload;
+
+  //step 1.1: destructuring the data which are essential for following validations
+  const { userId, iat } = decoded;
+
+  //step 2: Other validations. (exist, deleted, blocked)
+  const isUserExists = await User?.isUserExistsByCustomId(userId);
+  //step 5.1: checking is the user is exist
+
+  if (!isUserExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  //step 3: checking is user is already deleted
+  if (isUserExists?.isDeleted === true) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted!');
+  }
+
+  //step 4: checking is the user is blocked
+  if (isUserExists?.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
+  }
+
+  //step 5: checking the accessToken issued time, if the passwordChangeAt is getter then iat from JWT. Then invalidate the previous token.
+  if (
+    isUserExists.passwordChangeAt &&
+    User.isJWTAccessTokenIsIssuedBeforePasswordChanges(
+      isUserExists?.passwordChangeAt,
+      iat as number,
+    )
+  ) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
+  }
+
+  // step 6: create accessToken
+  const jwtPayload = {
+    // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
+    userId: isUserExists?.id,
+    role: isUserExists?.role,
+  };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+  return {accessToken};
+};
+
 export const AuthServices = {
   loginUser,
   changePasswordIntoDB,
+  refreshToken,
 };

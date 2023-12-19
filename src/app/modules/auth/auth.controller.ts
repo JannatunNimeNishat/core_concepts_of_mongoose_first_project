@@ -41,7 +41,22 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+// refreshToken deya accessToken generate korar api
+const refreshToken = catchAsync(async(req,res)=>{
+  const {refreshToken} = req.cookies;
+  const result = await AuthServices.refreshToken(refreshToken);
+
+ sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'access token is retrieved successfully',
+    data:result
+  });
+})
+
 export const AuthController = {
   loginUser,
   changePassword,
+  refreshToken
 };

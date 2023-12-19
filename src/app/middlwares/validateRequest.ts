@@ -9,6 +9,7 @@ const validateRequest = (schema: AnyZodObject) => {
     //if data validation is ok then call next() and pass the control to controller
     await schema.parseAsync({
       body: req.body,
+      cookies:req.cookies
     });
     next();
   });
