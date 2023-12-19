@@ -5,6 +5,7 @@ import { TLoginUser } from './auth.interface';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import bcrypt from 'bcrypt';
+import { createToken } from './auth.utils';
 const loginUser = async (payload: TLoginUser) => {
   /** steps:
    * 1. je id input e asbe oi id r user ase ki na.
@@ -13,8 +14,9 @@ const loginUser = async (payload: TLoginUser) => {
    * 4. input a asha password ta abong user er password filed e save hoye taka password tar compaire korte hobe bycript er compare method deya jodi 2 ta match kore then 5th step e jabe
    * 5. uporer 4 ta check tik takle Access Granted hobe r : AccessToken, RefreshToken pathate hobe.
    * 5.1. jwt install normal and typed npm i jsonwebtoken, npm i -D @types/jsonwebtoken
-   * 5.2 accessToken create kore user ke pathate hobe
-   * 6. sobar last e accessToken r needPasswordChange ta user ke pathaia dite hbe.
+   * 5.2 accessToken create kore hobe
+   * 6. create RefreshToken and set it to the cookie.
+   * 7. then accessToken, needPasswordChange, needsPasswordChange  ke pathaia dite hbe.
    */
 
   const isUserExists = await User?.isUserExistsByCustomId(payload?.id);
@@ -54,18 +56,25 @@ const loginUser = async (payload: TLoginUser) => {
   //step 5:  Access Granted: Send AccessToken, RefreshToken
   //step 5.1: npm i jsonwebtoken npm i -D @types/jsonwebtoken
 
-  // step 5.2: create accessToken and send to the user
+  // step 5.2: create accessToken 
   const jwtPayload = {
     // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
     userId: isUserExists?.id,
     role: isUserExists?.role,
   };
-  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+  const accessToken = createToken(jwtPayload,config.jwt_access_secret as string,config.jwt_access_expires_in as string);
+  /* const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
     expiresIn: '10d',
-  });
+  }); */
+  
+  //step 6: create refresh token
+  const refreshToken = createToken(jwtPayload,config.jwt_refresh_secret as string,config.jwt_refresh_expires_in as string);
 
+
+  // step 7: sending accessToken, refreshToken,needsPasswordChange
   return {
     accessToken,
+    refreshToken,
     needsPasswordChange: isUserExists?.needsPasswordChange,
   };
 };

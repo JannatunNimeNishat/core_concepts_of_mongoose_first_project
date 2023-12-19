@@ -3,21 +3,35 @@ import catchAsync from '../../utils/catchAsync';
 import { AuthServices } from './auth.service';
 import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
+import config from '../../config';
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.loginUser(req.body);
+  //setting the refreshToken to the browsers cookie.
+  const {  accessToken,refreshToken, needsPasswordChange } = result;
+
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+  });
+
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: 'User is logged in successfully',
-    data: result,
+    data: {
+      accessToken,
+      needsPasswordChange,
+    },
   });
 });
 
 const changePassword = catchAsync(async (req: Request, res: Response) => {
-  const {...passwordData} = req.body;
-  const result = await AuthServices.changePasswordIntoDB(req.user,passwordData);
-  //console.log(req.user, req.body);
+  const { ...passwordData } = req.body;
+  const result = await AuthServices.changePasswordIntoDB(
+    req.user,
+    passwordData,
+  );
 
   sendResponse(res, {
     success: true,
@@ -29,5 +43,5 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 
 export const AuthController = {
   loginUser,
-  changePassword
+  changePassword,
 };
