@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express"
 import catchAsync from "../utils/catchAsync"
 import AppError from "../errors/AppError";
 import httpStatus from "http-status";
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from "../config";
 /** auth middle ware steps
  * 1. getting the accessToken from the req.headers.authorization.
@@ -24,14 +24,14 @@ const auth = ()=>{
             if(err){
                 throw new AppError(httpStatus.UNAUTHORIZED,'You are not authorized');
             }
-            //decode the token data
-            console.log(decode);
-            const {userId, role} = decode;
+            
+           // console.log(decode);
 
-            //step 3.1: 
+            //step 3.1:  decode hoa token data amra amader custom Request property user er modde boshia deilam. jate pura app ei user decoded data poa jai. custom property add kora hoyce index.d.ts file e. 
+            req.user = decode as JwtPayload;
 
+            next();
         });
-    next();
     });
 }
 
