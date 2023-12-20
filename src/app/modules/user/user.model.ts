@@ -74,8 +74,8 @@ userSchema.statics.isPasswordMatched = async function (
   return passwordChecked;
 };
 
-//isJWTAccessTokenIsIssued before password change
-/*kono accessToken jodi hacked hoye jai tokon o agar accessToken deya data access kora jascilo. eta solve korte amra password change korte pari tokon amader collection e new akta fieldAdd hobe "passwordChangedAt" nam e. r amader decoded hoa data r modde je "iat" ei 2 ta amra compare korte pari. jodi "passwordChangedAt" ta recently hoy taile amra agar token ta invaild kore dibo. password change korle agar tokone r kaj korbe na. 
+/*//isJWTAccessTokenIsIssued before password change
+kono accessToken jodi hacked hoye jai tokon o agar accessToken deya data access kora jascilo. eta solve korte amra password change korte pari tokon amader collection e new akta fieldAdd hobe "passwordChangedAt" nam e. r amader decoded hoa data r modde je "iat" ei 2 ta amra compare korte pari. jodi "passwordChangedAt" ta recently hoy taile amra agar token ta invaild kore dibo. password change korle agar tokone r kaj korbe na. 
  *7: (index.d.ts) decode hoa accessToken er data amra amader custom Request property user er modde boshia deilam. jate pura app ei user decoded data poa jai. custom property add kora hoyce index.d.ts file e. */
 
 userSchema.statics.isJWTAccessTokenIsIssuedBeforePasswordChanges = function (
