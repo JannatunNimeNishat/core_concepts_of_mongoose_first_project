@@ -12,13 +12,13 @@ import { User } from '../modules/user/user.model';
  * 3. check is the incoming token is valid or not.
  * 3.1: destructuring the data which are essential for following validations
  *4. checking the incoming rolls from route with decoded role, is this user has the access to this route or not
- *5.
+ *5. Other validations. (exist, deleted, blocked)
  *6.checking the accessToken issue time.  kono accessToken jodi hacked hoye jai tokon o agar accessToken deya data access kora jascilo. eta solve korte amra password change korte pari tokon amader collection e new akta fieldAdd hobe "passwordChangedAt" nam e. r amader decoded hoa data r modde je "iat" ei 2 ta amra compare korte pari. jodi "passwordChangedAt" ta recently hoy taile amra agar token ta invaild kore dibo. password change korle agar tokone r kaj korbe na. 
  *7: (index.d.ts) decode hoa accessToken er data amra amader custom Request property user er modde boshia deilam. jate pura app ei user decoded data poa jai. custom property add kora hoyce index.d.ts file e.
  *
  */
 
-// akt route multiple user er access takte pare, so route teka auth call er shomoy multiple USER_ROLE aste pare, so auth er parameter e amra spread kore nici r type ta TUserRole er akta array deya hoyce.
+// akta route multiple user er access takte pare, so route teka auth call er shomoy multiple USER_ROLE aste pare, so auth er parameter e amra spread kore nici r type ta TUserRole er akta array deya hoyce.
 const auth = (...requiredRoles: TUserRole[]) => {
 
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
