@@ -4,6 +4,7 @@ import { USER_ROLE } from "./user.constant";
 
 export interface TUser {
   id: string;
+  email:string; // newly added 
   password: string;
   needsPasswordChange: boolean;
   passwordChangeAt?:Date; // password kun specific time e change hosce tar time

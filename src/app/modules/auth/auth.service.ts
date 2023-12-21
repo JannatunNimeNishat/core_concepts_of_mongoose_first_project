@@ -6,6 +6,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import bcrypt from 'bcrypt';
 import { createToken } from './auth.utils';
+import { sendEmail } from '../../utils/sendEmail';
 const loginUser = async (payload: TLoginUser) => {
   /** steps:
    * 1. je id input e asbe oi id r user ase ki na.
@@ -204,7 +205,9 @@ const refreshToken = async (token: string) => {
 (http://localhost:3000?id=A-0001?token=abvaceavaev)
 *step 1: find the user with given userId from frontend
 *step 2: general validations (userExists, isDeleted, isBlocked)
-*step 3: create accessToke
+*step 3: create resetToke. ei token er time ta kom hobe, ei time er modde reset korte hobe password
+*step 4: crate resetUILink with userId and resetToke.
+*step 5: sending the resetUILink through email 
 */
 const forgetPassword = async (userId:string) =>{
 
@@ -225,21 +228,22 @@ const forgetPassword = async (userId:string) =>{
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
   }
 
-   //create accessToken
+   //create resetToke
    const jwtPayload = {
-    // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
     userId: isUserExists?.id,
     role: isUserExists?.role,
   };
-  const accessToken = createToken(
+  const resetToke = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    '10m',
+    '10m', // 10 minutes er modde password change korbe. 10 minutes er pore token expire hoye jabe
   );
 
-  const resetUILink = `http://localhost:3000?id=${isUserExists?.id}&token=${accessToken}`
+  const resetUILink = `${config.reset_pass_ui_link}?id=${isUserExists?.id}&token=${resetToke}`
 
-  console.log(resetUILink);
+  //console.log(resetUILink);
+  //sending kake email pathabo ar ki pathabo 
+  sendEmail(isUserExists.email,resetUILink);
 
 }
 

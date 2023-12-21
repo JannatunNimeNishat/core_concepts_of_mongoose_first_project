@@ -24,6 +24,8 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   //set student role
   userData.role = 'student';
+  //newly added email field for forget reset password
+  userData.email = payload?.email;
 
   //finding academic semester info
   //we are finding the academicSemester info with the help of reference property called admissionSemester saved in Student model. so that we can use the semester year and code for creating studentId
@@ -87,6 +89,8 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   const userData: Partial<TUser> = {};
   userData.password = password || (config.default_password as string);
   userData.role = 'faculty';
+  //newly added email field for forget reset password
+  userData.email = payload?.email;
 
   const session = await startSession();
   try {
@@ -117,6 +121,8 @@ const createAdminIntoDB = async(password:string, payload:TAdmin)=>{
   const userData:Partial<TUser> = {};
   userData.password = password || (config.default_password);
   userData.role = 'admin';
+  //newly added email field for forget reset password
+  userData.email = payload?.email;
   const session = await startSession();
   try {
     session.startTransaction()
