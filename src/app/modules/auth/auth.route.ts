@@ -26,5 +26,16 @@ validateRequest(AuthValidation.refreshTokenValidationSchema),
 AuthController.refreshToken
 )
 
+//new
+/*forget-password:
+forget password route deya amra backend ke request korbo password reset er jonno. backend amader akta url dibe 
+(http://localhost:3000?id=A-0001?token=abvaceavaev) eita deya abar amra reset api call dibo*/
+
+router.post('/forget-password',
+validateRequest(AuthValidation.forgetPasswordValidationSchema),
+AuthController.forgetPassword
+)
+
+
 
 export const AuthRoutes = router;

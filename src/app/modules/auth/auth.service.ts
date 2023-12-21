@@ -197,8 +197,55 @@ const refreshToken = async (token: string) => {
   return {accessToken};
 };
 
+
+//new
+/*forget-password:
+ forget-password er jonno amra url create korteci 
+(http://localhost:3000?id=A-0001?token=abvaceavaev)
+*step 1: find the user with given userId from frontend
+*step 2: general validations (userExists, isDeleted, isBlocked)
+*step 3: create accessToke
+*/
+const forgetPassword = async (userId:string) =>{
+
+  const isUserExists = await User?.isUserExistsByCustomId(userId);
+
+  // checking is the user is exist
+  if (!isUserExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  //checking is user is already deleted
+  if (isUserExists?.isDeleted === true) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted!');
+  }
+
+  //checking is the user is blocked
+  if (isUserExists?.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
+  }
+
+   //create accessToken
+   const jwtPayload = {
+    // jar jonno accessToken banano hosce tar kisu info neya jwtPayload create hoy
+    userId: isUserExists?.id,
+    role: isUserExists?.role,
+  };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    '10m',
+  );
+
+  const resetUILink = `http://localhost:3000?id=${isUserExists?.id}&token=${accessToken}`
+
+  console.log(resetUILink);
+
+}
+
 export const AuthServices = {
   loginUser,
   changePasswordIntoDB,
   refreshToken,
+  forgetPassword
 };
