@@ -54,7 +54,7 @@ const getMe = catchAsync(async(req,res)=>{
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: 'Data is retrieved successfully',
+    message: 'User is retrieved successfully',
     data: result,
   });
 })
