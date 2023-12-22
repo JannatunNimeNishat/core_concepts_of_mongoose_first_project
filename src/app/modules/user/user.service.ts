@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { startSession } from 'mongoose';
 import config from '../../config';
 
@@ -18,8 +19,9 @@ import { Faculty } from '../faculty/faculty.model';
 import { TAdmin } from '../admin/admin.interface';
 import { Admin } from '../admin/admin.model';
 import { JwtPayload } from 'jsonwebtoken';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (file:any,password: string, payload: TStudent) => {
   //create a user
   // const user: NewUser = {};
   const userData: Partial<TUser> = {}; // partial makes it optional
@@ -51,6 +53,13 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
       userData.id = await generateStudentId(admissionSemester);
     }
 
+    //img upload // send img to cloudinary
+    // making our custom image name
+    const imageName = `${userData.id}${payload?.name?.firstName}`
+    //file path -> input e asha file er path ta. 
+    const path = file?.path;
+   const {secure_url} = await sendImageToCloudinary(imageName,path); 
+
     //s3 -> create a user (transaction-1)
     const newUser = await User.create([userData], { session });
     // const newUser = await User.create(userData);
@@ -64,6 +73,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     //set id, _id as user
     payload.id = newUser[0].id; // embedding id
     payload.user = newUser[0]._id; // reference _id
+    payload.profileImg = secure_url // cloudinary uploaded secure image url
 
     //s5 -> create a student (transaction-2)
     const newStudent = await Student.create([payload], { session });

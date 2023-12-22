@@ -9,13 +9,13 @@ import catchAsync from '../../utils/catchAsync';
 
 const createStudent = catchAsync(async (req, res) => {
   // RequestHandler -> createStudent er req:Request, res:Response next:NextFunction er type auto declare kore dey
+/*   console.log('file',req.file);
+  console.log(req.body); */
 
-  const { password, student: studentData } = req.body;
+ const { password, student: studentData } = req.body;
+  const result = await UserServices.createStudentIntoDB(req.file,password, studentData);
 
-  //will call service func to send this data
-  const result = await UserServices.createStudentIntoDB(password, studentData);
-
-  //handling response by using utility sendResponse function
+  
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { UserControllers } from './user.controller';
 
 import { studentValidations } from '../student/student.validation';
@@ -8,12 +8,24 @@ import { adminValidation } from '../admin/admin.validation';
 import auth from '../../middlwares/auth';
 import { USER_ROLE } from './user.constant';
 import { UserValidation } from './user.validation';
+import { upload } from '../../utils/sendImageToCloudinary';
 
 const router = express.Router();
 
 //student  -> 
-//auth role check:  new student shudu admin e create korte parbe. eita varify korte auth middleware e user er role ta pathano hosce, ai role r accessToken decoded korar pore je role asbe ai 2 ta match korlai kabol student create korte parbe.
-router.post( '/create-student',auth(USER_ROLE.admin),validateRequest(studentValidations.createStudentValidationSchema), UserControllers.createStudent,
+/** amra input e patasci file r data form-data hishbe pore format kore file ke locally save korteci r normal student data ke req.body te json akare kore nisci
+step 1: uploading image loacly using multer -> upload function written on utils -> sendImageToCloudinary
+input e file nam e astece ti "file"
+* step2: frontend teka data text format form-date e asteca so amra req.body.data ke JSON.pare kore then req.body te assign kore dibo. eta amader data ta abar agar moto json format e asbe, abar validatoin e amra body te direct data validate kortam oi condition o match korteca. 
+*/
+router.post( '/create-student',auth(USER_ROLE.admin),
+upload.single('file'),
+(req:Request,res:Response, next:NextFunction)=>{
+    req.body = JSON.parse(req.body.data);
+    next();
+},  
+validateRequest(studentValidations.createStudentValidationSchema), 
+UserControllers.createStudent,
 ); //we can't pass parameter with middleware so we use a higher order function. So that we can pass parameter because we are validating data we need schema
 
 //faculty

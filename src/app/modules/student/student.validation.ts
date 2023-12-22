@@ -69,7 +69,7 @@ const updateLocalGuardianValidationSchema = z.object({
 const createStudentValidationSchema = z.object({
   // because we are valading our data with validateRequest middleware
   body: z.object({
-    password: z.string(),
+    password: z.string().optional(),
     student: z.object({
       name: createUserNameValidationSchema,
       gender: z.enum(['male', 'female', 'other']),
@@ -97,7 +97,7 @@ const createStudentValidationSchema = z.object({
       localGuardian: createLocalGuardianValidationSchema,
       admissionSemester: z.string(),
       academicDepartment: z.string(),
-      profileImg: z.string().optional(),
+      //profileImg: z.string().optional(),
     }),
   }),
 });
@@ -133,7 +133,7 @@ const updateStudentValidationSchema = z.object({
       localGuardian: updateLocalGuardianValidationSchema.optional(),
       admissionSemester: z.string().optional(),
       academicDepartment: z.string().optional(),
-      profileImg: z.string().optional(),
+      //profileImg: z.string().optional(),
     }),
   }),
 });
