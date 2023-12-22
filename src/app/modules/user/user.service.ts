@@ -6,14 +6,17 @@ import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
-import { generateAdminId, generateFacultyId, generateStudentId } from './user.utils';
+import {
+  generateAdminId,
+  generateFacultyId,
+  generateStudentId,
+} from './user.utils';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { TAdmin } from '../admin/admin.interface';
 import { Admin } from '../admin/admin.model';
-import { verifyToken } from '../auth/auth.utils';
 import { JwtPayload } from 'jsonwebtoken';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
@@ -112,72 +115,77 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
     await session.commitTransaction();
     await session.endSession();
     return newFaculty;
-  } catch (error:any) {
+  } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(error)
+    throw new Error(error);
   }
 };
 
-const createAdminIntoDB = async(password:string, payload:TAdmin)=>{
-  const userData:Partial<TUser> = {};
-  userData.password = password || (config.default_password);
+const createAdminIntoDB = async (password: string, payload: TAdmin) => {
+  const userData: Partial<TUser> = {};
+  userData.password = password || config.default_password;
   userData.role = 'admin';
   //newly added email field for forget reset password
   userData.email = payload?.email;
   const session = await startSession();
   try {
-    session.startTransaction()
+    session.startTransaction();
     userData.id = await generateAdminId();
-    const newUser = await User.create([userData],{session});
-    if(!newUser.length){
+    const newUser = await User.create([userData], { session });
+    if (!newUser.length) {
       throw new AppError(httpStatus.BAD_REQUEST, 'failed to create user');
     }
     payload.id = newUser[0]?.id;
-    payload.user = newUser[0]?._id
-    const newAdmin = await Admin.create([payload],{session})
-    if(!newAdmin.length){
+    payload.user = newUser[0]?._id;
+    const newAdmin = await Admin.create([payload], { session });
+    if (!newAdmin.length) {
       throw new AppError(httpStatus.BAD_REQUEST, 'failed to create admin');
     }
-   await session.commitTransaction();
-   await session.endSession()
-    return newAdmin
-  } catch (error:any) {
-   await session.abortTransaction()
-   await session.endSession();
+    await session.commitTransaction();
+    await session.endSession();
+    return newAdmin;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
     throw new Error(error);
   }
-
-}
+};
 
 /** getMe route
  *step:1 amra user er kas teka tar asscessToken ta nisci req.headers.authorization er modde. r ai token ta amra auth middleware deya verify korteci, verify hole req.user er modde decoded data ta deya disci
  * step2: acon ei req.user teka {userId, role} ber kore. role jodi student hole taile Student model e abar role admin hole Admin model e abar role faculty hole Faculty model e userId deya findOne kore data ta return korteci.
  *
- * 
+ *
  * "means accessToken valid hole accessToken e taka userId tar data ta peya jasci"
  */
 
-const getMeFromDB = async(user:JwtPayload)=>{
-
- const {userId, role} = user;
+const getMeFromDB = async (user: JwtPayload) => {
+  const { userId, role } = user;
   let result = null;
-  if(role === 'student'){
-    result = await Student.findOne({id:userId}).populate('user');
+  if (role === 'student') {
+    result = await Student.findOne({ id: userId }).populate('user');
   }
-  if(role === 'faculty'){
-    result = await Faculty.findOne({id:userId}).populate('user');
+  if (role === 'faculty') {
+    result = await Faculty.findOne({ id: userId }).populate('user');
   }
-  if(role === 'admin'){
-    result = await Admin.findOne({id:userId}).populate('user');
+  if (role === 'admin') {
+    result = await Admin.findOne({ id: userId }).populate('user');
   }
 
   return result;
-}
+};
+
+//changeStatus
+const changeStatusIntoDB = async (id: string, payload: { status: string }) => {
+  const result = await User.findByIdAndUpdate(id, payload, { new: true });
+  return result;
+};
 
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
-  getMeFromDB
+  getMeFromDB,
+  changeStatusIntoDB,
 };

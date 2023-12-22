@@ -5,8 +5,7 @@ import sendResponse from '../../utils/sendResponse';
 
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
-import AppError from '../../errors/AppError';
-import { JwtPayload } from 'jsonwebtoken';
+
 
 const createStudent = catchAsync(async (req, res) => {
   // RequestHandler -> createStudent er req:Request, res:Response next:NextFunction er type auto declare kore dey
@@ -59,9 +58,21 @@ const getMe = catchAsync(async(req,res)=>{
   });
 })
 
+const changeStatus = catchAsync(async(req,res)=>{
+  const id = req.params.id;
+  const result = await UserServices.changeStatusIntoDB(id,req.body)
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'User is status is changed successfully',
+    data: result,
+  });
+})
+
 export const UserControllers = {
   createStudent,
   createFaculty,
   createAdmin,
-  getMe
+  getMe,
+  changeStatus
 };
