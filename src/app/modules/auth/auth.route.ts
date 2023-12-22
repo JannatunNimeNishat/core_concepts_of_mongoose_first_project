@@ -27,13 +27,20 @@ AuthController.refreshToken
 )
 
 //new
-/*forget-password:
+/*1. forget-password:
 forget password route deya amra backend ke request korbo password reset er jonno. backend amader akta url dibe 
 (http://localhost:3000?id=A-0001?token=abvaceavaev) eita deya abar amra reset api call dibo*/
 
 router.post('/forget-password',
 validateRequest(AuthValidation.forgetPasswordValidationSchema),
 AuthController.forgetPassword
+)
+/**2. Reset password route
+ * Email e pathano url teka amra userId, token ke alada kore felbo. Then userId r newPassword ke body and token ke headers er authorization e set kore ai "reset-password" api hit korbo. 
+ */
+router.post('/reset-password',
+validateRequest(AuthValidation.resetPasswordValidationSchema),
+AuthController.resetPassword
 )
 
 

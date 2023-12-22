@@ -195,9 +195,8 @@ const refreshToken = async (token: string) => {
     config.jwt_access_secret as string,
     config.jwt_access_expires_in as string,
   );
-  return {accessToken};
+  return { accessToken };
 };
-
 
 //new
 /*forget-password:
@@ -207,10 +206,9 @@ const refreshToken = async (token: string) => {
 *step 2: general validations (userExists, isDeleted, isBlocked)
 *step 3: create resetToke. ei token er time ta kom hobe, ei time er modde reset korte hobe password
 *step 4: crate resetUILink with userId and resetToke.
-*step 5: sending the resetUILink through email 
+*step 5: sending the resetUILink through email (nodemailer)
 */
-const forgetPassword = async (userId:string) =>{
-
+const forgetPassword = async (userId: string) => {
   const isUserExists = await User?.isUserExistsByCustomId(userId);
 
   // checking is the user is exist
@@ -228,8 +226,8 @@ const forgetPassword = async (userId:string) =>{
     throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
   }
 
-   //create resetToke
-   const jwtPayload = {
+  //create resetToke
+  const jwtPayload = {
     userId: isUserExists?.id,
     role: isUserExists?.role,
   };
@@ -239,17 +237,76 @@ const forgetPassword = async (userId:string) =>{
     '10m', // 10 minutes er modde password change korbe. 10 minutes er pore token expire hoye jabe
   );
 
-  const resetUILink = `${config.reset_pass_ui_link}?id=${isUserExists?.id}&token=${resetToke}`
+  const resetUILink = `${config.reset_pass_ui_link}?id=${isUserExists?.id}&token=${resetToke}`;
 
-  //console.log(resetUILink);
-  //sending kake email pathabo ar ki pathabo 
-  sendEmail(isUserExists.email,resetUILink);
+  console.log(resetUILink);
+  //sending kake email pathabo ar ki pathabo
+  sendEmail(isUserExists?.email, resetUILink);
+};
 
-}
+/**reset-password
+ * step 1: find the user with given userId from frontend
+ * step 2: general validations (userExists, isDeleted, isBlocked)
+ * step 3: decoded the incoming token
+ * step 4: token e taka userId r input e asha id same ki na. mane onno karu token deya jate kau password change korte na pare
+ * step 5: hashed the incoming newPassword
+ *
+ */
+const resetPassword = async (
+  payload: { id: string; newPassword: string },
+  token: string,
+) => {
+  const isUserExists = await User?.isUserExistsByCustomId(payload?.id);
+
+  // checking is the user is exist
+  if (!isUserExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+  }
+
+  //checking is user is already deleted
+  if (isUserExists?.isDeleted === true) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted!');
+  }
+
+  //checking is the user is blocked
+  if (isUserExists?.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
+  }
+
+  //decode the incoming token. invalid ba token expire hoyle gela ai decoded auto error dey.
+  const decoded = jwt.verify(
+    token,
+    config.jwt_access_secret as string, // jehutu amra forget password e jwt_access_secret deya token create korecilam
+  ) as JwtPayload;
+
+  const { userId } = decoded;
+  //token e taka userId r input e asha id same ki na. mane onno karu token deya jate kau password change korte na pare
+  if (userId !== payload.id) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Forbidden access');
+  }
+
+  //hashed the incoming newPassword
+  const newHashedPassword = await bcrypt.hash(
+    payload?.newPassword,
+    Number(config.saltRounds),
+  );
+
+  await User?.findOneAndUpdate(
+    {
+      id: userId,
+    },
+    {
+      password: newHashedPassword,
+      needsPasswordChange: false,
+      passwordChangeAt: new Date(),
+    },
+  );
+};
 
 export const AuthServices = {
   loginUser,
   changePasswordIntoDB,
   refreshToken,
-  forgetPassword
+  forgetPassword,
+  resetPassword,
 };

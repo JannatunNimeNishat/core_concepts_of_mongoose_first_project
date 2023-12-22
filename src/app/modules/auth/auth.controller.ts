@@ -8,7 +8,7 @@ import config from '../../config';
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.loginUser(req.body);
   //setting the refreshToken to the browsers cookie.
-  const {  accessToken,refreshToken, needsPasswordChange } = result;
+  const { accessToken, refreshToken, needsPasswordChange } = result;
 
   res.cookie('refreshToken', refreshToken, {
     secure: config.NODE_ENV === 'production',
@@ -41,36 +41,47 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 // refreshToken deya accessToken generate korar api
-const refreshToken = catchAsync(async(req,res)=>{
-  const {refreshToken} = req.cookies;
+const refreshToken = catchAsync(async (req, res) => {
+  const { refreshToken } = req.cookies;
   const result = await AuthServices.refreshToken(refreshToken);
 
- sendResponse(res, {
+  sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: 'access token is retrieved successfully',
-    data:result
+    data: result,
   });
-})
-
-
-//new 
-const forgetPassword = catchAsync(async (req: Request, res: Response) =>{
-  const userId = req.body.id;
-const result = await AuthServices.forgetPassword(userId);
-sendResponse(res, {
-  success: true,
-  statusCode: httpStatus.OK,
-  message: 'Reset link is generated successfully',
-  data:result
 });
-})
+
+//new  forget password
+const forgetPassword = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.body.id;
+  const result = await AuthServices.forgetPassword(userId);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Reset link is generated successfully',
+    data: result,
+  });
+});
+
+//reset password
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const token = req.headers.authorization;
+  const result = await AuthServices.resetPassword(req.body,token);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Password is reset successfully',
+    data: result,
+  });
+});
 
 export const AuthController = {
   loginUser,
   changePassword,
   refreshToken,
-  forgetPassword
+  forgetPassword,
+  resetPassword 
 };
