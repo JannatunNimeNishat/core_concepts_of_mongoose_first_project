@@ -21,6 +21,16 @@ router.post('/create-faculty',auth(USER_ROLE.admin), validateRequest(facultyVali
 //admin
 router.post('/create-admin',
 // auth(USER_ROLE.admin),
-validateRequest(adminValidation.createAdminValidationSchema),UserControllers.createAdmin)
+validateRequest(adminValidation.createAdminValidationSchema),UserControllers.createAdmin);
+
+
+//new 
+// me route
+/*akta specific user er data jate onno user na pai. token takar por o jate akjon er data onno jon na pai */
+router.get('/me',
+auth(USER_ROLE.student,USER_ROLE.admin,USER_ROLE.faculty),
+UserControllers.getMe
+)
+
 
 export const UserRouters = router;

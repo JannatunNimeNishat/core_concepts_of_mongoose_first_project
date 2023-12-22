@@ -5,6 +5,8 @@ import sendResponse from '../../utils/sendResponse';
 
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
+import AppError from '../../errors/AppError';
+import { JwtPayload } from 'jsonwebtoken';
 
 const createStudent = catchAsync(async (req, res) => {
   // RequestHandler -> createStudent er req:Request, res:Response next:NextFunction er type auto declare kore dey
@@ -45,8 +47,21 @@ const createAdmin = catchAsync(async(req,res)=>{
   });
 })
 
+//me controller
+const getMe = catchAsync(async(req,res)=>{
+
+  const result = await UserServices.getMeFromDB(req.user)
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Data is retrieved successfully',
+    data: result,
+  });
+})
+
 export const UserControllers = {
   createStudent,
   createFaculty,
   createAdmin,
+  getMe
 };

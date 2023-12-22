@@ -5,7 +5,7 @@ import { TLoginUser } from './auth.interface';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import bcrypt from 'bcrypt';
-import { createToken } from './auth.utils';
+import { createToken, verifyToken } from './auth.utils';
 import { sendEmail } from '../../utils/sendEmail';
 const loginUser = async (payload: TLoginUser) => {
   /** steps:
@@ -147,10 +147,13 @@ const changePasswordIntoDB = async (
 const refreshToken = async (token: string) => {
   //step 1: check is the incoming refresh token is valid or not
 
-  const decoded = jwt.verify(
+  const decoded = verifyToken(token,config.jwt_refresh_secret as string);
+
+  /*old
+   const decoded = jwt.verify(
     token,
     config.jwt_refresh_secret as string,
-  ) as JwtPayload;
+  ) as JwtPayload; */
 
   //step 1.1: destructuring the data which are essential for following validations
   const { userId, iat } = decoded;
@@ -201,7 +204,7 @@ const refreshToken = async (token: string) => {
 //new
 /*forget-password:
  forget-password er jonno amra url create korteci 
-(http://localhost:3000?id=A-0001?token=abvaceavaev)
+(http://localhost:3000?id=A-0001&token=abvaceavaev)
 *step 1: find the user with given userId from frontend
 *step 2: general validations (userExists, isDeleted, isBlocked)
 *step 3: create resetToke. ei token er time ta kom hobe, ei time er modde reset korte hobe password
@@ -250,7 +253,7 @@ const forgetPassword = async (userId: string) => {
  * step 3: decoded the incoming token
  * step 4: token e taka userId r input e asha id same ki na. mane onno karu token deya jate kau password change korte na pare
  * step 5: hashed the incoming newPassword
- *
+ *step 6: update the newHashedPassword.
  */
 const resetPassword = async (
   payload: { id: string; newPassword: string },
@@ -302,6 +305,8 @@ const resetPassword = async (
     },
   );
 };
+
+
 
 export const AuthServices = {
   loginUser,

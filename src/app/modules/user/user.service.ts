@@ -13,6 +13,8 @@ import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { TAdmin } from '../admin/admin.interface';
 import { Admin } from '../admin/admin.model';
+import { verifyToken } from '../auth/auth.utils';
+import { JwtPayload } from 'jsonwebtoken';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   //create a user
@@ -148,8 +150,34 @@ const createAdminIntoDB = async(password:string, payload:TAdmin)=>{
 
 }
 
+/** getMe route
+ *step:1 amra user er kas teka tar asscessToken ta nisci req.headers.authorization er modde. r ai token ta amra auth middleware deya verify korteci, verify hole req.user er modde decoded data ta deya disci
+ * step2: acon ei req.user teka {userId, role} ber kore. role jodi student hole taile Student model e abar role admin hole Admin model e abar role faculty hole Faculty model e userId deya findOne kore data ta return korteci.
+ *
+ * 
+ * "means accessToken valid hole accessToken e taka userId tar data ta peya jasci"
+ */
+
+const getMeFromDB = async(user:JwtPayload)=>{
+
+ const {userId, role} = user;
+  let result = null;
+  if(role === 'student'){
+    result = await Student.findOne({id:userId}).populate('user');
+  }
+  if(role === 'faculty'){
+    result = await Faculty.findOne({id:userId}).populate('user');
+  }
+  if(role === 'admin'){
+    result = await Admin.findOne({id:userId}).populate('user');
+  }
+
+  return result;
+}
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
-  createAdminIntoDB
+  createAdminIntoDB,
+  getMeFromDB
 };
