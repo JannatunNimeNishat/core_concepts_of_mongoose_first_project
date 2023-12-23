@@ -11,8 +11,7 @@ export const sendEmail = async (to:string, html:string)=>{
           // TODO: replace `user` and `pass` values from <https://forwardemail.net>
           user: config?.nodemailer_sender_email,
           pass: config?.nodemailer_sender_pass,
-         /*  user: "nishatnime100@gmail.com",
-          pass: "tuej plmr hkyg kpnt", */
+        
         },
       });
 
