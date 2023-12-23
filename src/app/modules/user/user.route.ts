@@ -13,7 +13,7 @@ import { upload } from '../../utils/sendImageToCloudinary';
 const router = express.Router();
 
 //student  -> 
-/** amra input e patasci file r data form-data hishbe pore format kore file ke locally save korteci r normal student data ke req.body te json akare kore nisci
+/** amra input e patasci file r student data form-data hishbe pore format kore file ke locally save korteci r normal student data ke req.body te json akare kore nisci
 step 1: uploading image loacly using multer -> upload function written on utils -> sendImageToCloudinary
 input e file nam e astece ti "file"
 * step2: frontend teka data text format form-date e asteca so amra req.body.data ke JSON.pare kore then req.body te assign kore dibo. eta amader data ta abar agar moto json format e asbe, abar validatoin e amra body te direct data validate kortam oi condition o match korteca. 
