@@ -26,6 +26,18 @@ const updateOfferCourse = catchAsync(async(req:Request,res:Response)=>{
 });
 
 
+const getAllOfferedCourse = catchAsync(async(req:Request,res:Response)=>{
+    
+    const result = await OfferedCourseServices.getAllOfferedCourseFromDB();
+    sendResponse(res,{
+        statusCode:httpStatus.OK,
+        success:true,
+        message:'Offered Courses retrieved successfully',
+        data:result
+    })
+});
+
+
 
 
 
@@ -33,5 +45,6 @@ const updateOfferCourse = catchAsync(async(req:Request,res:Response)=>{
 
 export const OfferedCourseControllers = {
     createOfferCourse,
-    updateOfferCourse
+    updateOfferCourse,
+    getAllOfferedCourse
 }

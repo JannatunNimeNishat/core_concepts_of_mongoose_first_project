@@ -203,7 +203,15 @@ const updateOfferCourseIntoDB = async (id:string, payload:Pick<TOfferedCourse, '
 
 }
 
+const getAllOfferedCourseFromDB =async () => {
+
+  const result = await OfferedCourse?.find({});
+  return result;
+  
+}
+
 export const OfferedCourseServices = {
   createOfferCourseIntoDB,
-  updateOfferCourseIntoDB
+  updateOfferCourseIntoDB,
+  getAllOfferedCourseFromDB
 };
