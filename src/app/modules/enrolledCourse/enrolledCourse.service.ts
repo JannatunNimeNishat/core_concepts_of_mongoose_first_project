@@ -2,12 +2,17 @@
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import { OfferedCourse } from '../offeredCourse/offeredCourse.model';
-import { TEnrolledCourse } from './enrolledCourse.interface';
+import {
+  TEnrolledCourse,
+  TEnrolledCourseMarks,
+} from './enrolledCourse.interface';
 import { EnrolledCourse } from './enrolledCourse.model';
 import { Student } from '../student/student.model';
 import mongoose from 'mongoose';
 import { SemesterRegistration } from '../semesterRegistration/semesterRegistration.model';
 import { Course } from '../course/course.model';
+import { Faculty } from '../faculty/faculty.model';
+import { calculateGradeAndPoints } from './enrolledCourse.utils';
 
 /** steps for createEnrollCourse
  * step 1: incoming offeredCourse exists kore ki na.
@@ -15,7 +20,7 @@ import { Course } from '../course/course.model';
  * step 3: akta student jate aki course e akadik bar enroll korte na pare
  * step 4: check if the max credit exceed. je semesterRegistration colteca tar max credit exceed hoa jabe na
  * step 4.1: akta student ai offeredSemester e kun kun course e enroll korteca saita ber kore, oi course gular total credit koto seta ber kora hosce lookup and group deya.
- * step 4.2: acan amara je course e enroll korte cai tar credit r agar enroll kora course gular credit jog kore jodi oi semester er max credit teka bashi hoye jai tahole amra error deya bolbo max credit reached.  
+ * step 4.2: acan amara je course e enroll korte cai tar credit r agar enroll kora course gular credit jog kore jodi oi semester er max credit teka bashi hoye jai tahole amra error deya bolbo max credit reached.
  * step 5: sob tik takle create an enrolled Course
  * step 6: student enroll kore fella token amdaer maxCapacity -1 korte hobe. karon akta student enroll kore felce so capacity o 1 kome gase.
  *
@@ -171,7 +176,6 @@ const createEnrolledCourseIntoDB = async (
     await session.endSession();
 
     return result;
-    
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
@@ -179,6 +183,104 @@ const createEnrolledCourseIntoDB = async (
   }
 };
 
+/**steps for updateEnrolledCourseMarksIntoDB
+ * step 1: validations
+ * step 2: token e je faculty astece she oi course nisce ki na. je course ta nibe sai sudu marks update korte parbe. so checking the incoming faculty is taking the course or not
+ * step 3:
+ *
+ *
+ */
+
+//update the course marks
+const updateEnrolledCourseMarksIntoDB = async (
+  facultyId: string,
+  payload: Partial<TEnrolledCourse>,
+) => {
+  const { semesterRegistration, offeredCourse, student, courseMarks } = payload;
+
+  //validations
+  const isSemesterRegistration =
+    await SemesterRegistration.findById(semesterRegistration);
+
+  if (!isSemesterRegistration) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'semesterRegistration is not found',
+    );
+  }
+
+  const isOfferedCourseExists = await OfferedCourse.findById(offeredCourse);
+
+  if (!isOfferedCourseExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'OfferedCourse is not found');
+  }
+
+  const isStudentExists = await Student.findById(student);
+
+  if (!isStudentExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'student is not found');
+  }
+
+  //2. token e je faculty astece she oi course nisce ki na. je course ta nibe sai sudu marks update korte parbe. so checking the incoming faculty is taking the course or not
+
+  const facultyObjectId = await Faculty.findOne({ id: facultyId }, { _id: 1 });
+
+  if (!facultyObjectId) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Faculty is not found');
+  }
+
+  const isCourseBelongToFaculty = await EnrolledCourse.findOne({
+    semesterRegistration,
+    offeredCourse,
+    student,
+    faculty: facultyObjectId,
+  });
+
+  if (!isCourseBelongToFaculty) {
+    throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden');
+  }
+
+  //3. update
+  //3.1 finalTerm input e asle grade, gradePoint, isCompleted add kore felte hobe
+  //3.2 dynamic update
+
+  const modifiedData: Record<string, unknown> = {
+    ...courseMarks,
+  };
+
+  if (courseMarks?.finalTerm) {
+    const { classTest1, classTest2, midTerm, finalTerm } =
+      isCourseBelongToFaculty.courseMarks;
+
+    const totalMarks =
+      Math.ceil(classTest1 * 0.1) +
+      Math.ceil(midTerm * 0.3) +
+      Math.ceil(classTest2 * 0.1) +
+      Math.ceil(finalTerm * 0.5);
+
+  const result =   calculateGradeAndPoints(totalMarks)
+  modifiedData.grade = result.grade;
+  modifiedData.gradePoints = result.gradePoints;
+  modifiedData.isCompleted = true;
+
+  }
+
+  if (courseMarks && Object.keys(courseMarks).length) {
+    for (const [key, value] of Object.entries(courseMarks)) {
+      modifiedData[`courseMarks.${key}`] = value;
+    }
+  }
+
+  const result = await EnrolledCourse.findByIdAndUpdate(
+    isCourseBelongToFaculty._id,
+    modifiedData,
+    { new: true },
+  );
+
+  return result;
+};
+
 export const EnrollCoursesService = {
   createEnrolledCourseIntoDB,
+  updateEnrolledCourseMarksIntoDB,
 };
