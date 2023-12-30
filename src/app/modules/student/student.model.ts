@@ -91,16 +91,18 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 //2. creating student Schema
 const studentSchema = new Schema<TStudent, StudentModel>(
   {
-    id: { type: String, required: true, unique: true },
+    id: { type: String, required: true, unique: true, trim:true },
     user: {
       type: Schema.Types.ObjectId, //it will contain the reference id of user data
       required: [true, 'user id field is required'],
       unique: true,
       ref: 'User',
+      trim:true
     },
     name: {
       type: userNameSchema,
       required: [true, 'name is required'],
+      trim:true
     },
     gender: {
       //male or female as par student interface
@@ -111,11 +113,13 @@ const studentSchema = new Schema<TStudent, StudentModel>(
           "'{VALUE}' is not valid. The gender field can only be one of the following: 'male', 'female' or 'other'",
       },
       required: [true, 'gender is required'],
+      trim:true
     },
     email: {
       type: String,
       required: [true, 'email is required'],
       unique: true,
+      trim:true
     },
     dateOfBirth: { type: String },
     contactNo: {
