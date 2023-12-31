@@ -8,27 +8,33 @@ const semesterRegistrationSchema = new Schema<TSemesterRegistration>({
         ref:'AcademicSemester',
         unique:true,
         required:true,
+        trim:true
     },
     status:{
         type:String,
         enum:SemesterRegistrationStatus,
-        default:'UPCOMING'  
+        default:'UPCOMING',
+        trim:true  
     },
     startDate:{
         type:Date,
-        required:true
+        required:true,
+        trim:true
     },
     endDate:{
         type:Date,
-        required:true
+        required:true,
+        trim:true
     },
     minCredit:{
         type:Number,
-        default:3
+        default:3,
+        trim:true
     },
     maxCredit:{
         type:Number,
-        default:15
+        default:15,
+        trim:true
     }
 },{
     timestamps:true
