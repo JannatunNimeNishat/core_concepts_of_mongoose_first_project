@@ -38,26 +38,32 @@ const adminSchema = new Schema<TAdmin>(
     name: {
       type: adminNameSchema,
       required: [true, 'name field is required'],
+      trim: true
     },
     gender: {
       type: String,
       required: [true, 'gender field is required'],
+      trim: true
     },
     dateOfBirth: {
       type: String,
       required: [true, 'dateOfBirth field is required'],
+      trim: true
     },
     email: {
       type: String,
       required: [true, 'email field is required'],
+      trim: true
     },
     contactNo: {
       type: String,
       required: [true, 'contactNo field is required'],
+      trim: true
     },
     emergencyContactNo: {
       type: String,
       required: [true, 'emergencyContactNo field is required'],
+      trim: true
     },
     bloodGroup: {
       type: String,
@@ -69,9 +75,11 @@ const adminSchema = new Schema<TAdmin>(
     permanentAddress: {
       type: String,
       required: [true, 'permanentAddress field is required'],
+      trim: true
     },
     profileImg: {
       type: String,
+      trim: true
     },
     isDeleted: {
       type: Boolean,
