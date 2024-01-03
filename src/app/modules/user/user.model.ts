@@ -8,20 +8,24 @@ const userSchema = new Schema<TUser, UserModel>(
       type: String,
       required: true,
       unique: true,
+      trim:true
     },
     email:{ // newly added
       type:String,
       required: true,
       unique: true,
+      trim:true
     },
     password: {
       type: String,
       required: true,
       select: 0, // this select 0 will prevent this password field to find
+      trim:true
     },
     needsPasswordChange: {
       type: Boolean,
       default: true,
+      trim:true
     },
     passwordChangeAt: {
       //// password kun specific time e change hosce tar time
@@ -30,6 +34,7 @@ const userSchema = new Schema<TUser, UserModel>(
     role: {
       type: String,
       enum: ['student', 'faculty', 'admin'],
+      trim:true
     },
     status: {
       type: String,
