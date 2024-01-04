@@ -12,25 +12,30 @@ import httpStatus from 'http-status';
       type: String,
       enum: AcademicSemesterName, // it is coming from academicSemester.constant
       required: true,
+      trim:true
     },
     year: {
       type: String,
       required: true,
+      trim:true
     },
     code: {
       type: String,
       enum:AcademicSemesterCode,// it is coming from academicSemester.constant
       required: true,
+      trim:true
     },
     startMonth: {
       type: String,
       enum: Months,// it is coming from academicSemester.constant
-      required:true
+      required:true,
+      trim:true
     },
     endMonth: {
       type: String,
       enum: Months,// it is coming from academicSemester.constant
-      required:true
+      required:true,
+      trim:true
     },
   },
   {
