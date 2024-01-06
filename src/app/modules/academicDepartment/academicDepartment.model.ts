@@ -9,11 +9,13 @@ const academicDepartmentSchema = new Schema<TAcademicDepartment>(
       type: String,
       required: true,
       unique: true,
+      trim:true
     },
     academicFaculty: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: 'AcademicFaculty',
+      trim:true
     },
   },
   {
