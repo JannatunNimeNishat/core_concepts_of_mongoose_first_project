@@ -19,11 +19,12 @@ export const Course = model<TCourse>('Course',courseSchema);
 
 
 const courseFacultySchema = new Schema<TCourseFaculty>({
-    course:{type:Schema.Types.ObjectId, ref:'Course', unique:true},
+    course:{type:Schema.Types.ObjectId, ref:'Course', unique:true,trim:true},
     faculties: [
         {
           type: Schema.Types.ObjectId,
           ref: 'Faculty',
+          trim:true
         },
       ],
 })
