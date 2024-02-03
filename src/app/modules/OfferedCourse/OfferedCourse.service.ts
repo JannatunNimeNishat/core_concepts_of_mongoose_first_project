@@ -9,6 +9,7 @@ import { SemesterRegistration } from '../semesterRegistration/semesterRegistrati
 import { TOfferedCourse } from './OfferedCourse.interface';
 import { OfferedCourse } from './OfferedCourse.model';
 import { hasTimeConflict } from './OfferedCourse.utils';
+import { Student } from '../student/student.model';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -139,6 +140,114 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
     .fields();
 
   const result = await offeredCourseQuery.modelQuery;
+  const meta = await offeredCourseQuery.countTotal();
+  return {
+    meta,
+    result,
+  };
+};
+
+const getMyOfferedCoursesFromDB = async (userId: string) => {
+  const student = await Student.findOne({ id: userId });
+  //find student
+  if (!student) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+
+  //find current ongoing semester
+  const currentOngoingRegistrationSemester = await SemesterRegistration.findOne(
+    { status: 'ONGOING' },
+  );
+
+  if (!currentOngoingRegistrationSemester) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'There is no ONGOING semester registration ',
+    );
+  }
+
+  const result = await OfferedCourse.aggregate([
+    {
+      //$match-> filter kore specific student er jonno ongoing semester er available course ber kora hosce. ongoing semester, student er faculty and department e je je course offered kora hosce segula ber kora hosce.
+      $match: {
+        semesterRegistration: currentOngoingRegistrationSemester?._id,
+        academicFaculty: student?.academicFaculty,
+        academicDepartment: student?.academicDepartment,
+      },
+    },
+    {
+      //course kun gula offered hosce saita bujar jonno look up kora hosce. jehutut OfferedCourse e course field e referance id hishabe ase
+      $lookup: {
+        from: 'courses',
+        localField: 'course', // OfferedCourse e je nam e ase
+        foreignField: '_id', // jekan teka anteci oi collection e field er nam ta
+        as: 'course', //local akta nam deya holo pore use korar jonno
+      },
+    },
+    {
+      $unwind: '$course',
+    },
+    {
+      //enroll kora course gule ke filter out kora hosce. jate aki course e multiple time enroll na korte pare
+      $lookup: {
+        from: 'enrolledcourses',
+        let: {
+          //declearing a varibale here
+          currentOngoingRegisterSemester:
+            currentOngoingRegistrationSemester._id,
+          currentStudent: student._id,
+        },
+        pipeline: [
+          {
+            // ei semester e offered kora course gula neya hosce. then ei student er enrolled kora course gula ber kora hosce ei math er modde.
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $eq: [
+                      '$semesterRegistration',
+                      '$$currentOngoingRegisterSemester', // veriable access korte duble $$ er modde dite hobe
+                    ],
+                  },
+                  {
+                    $eq: ['$student', '$$currentStudent'], // veriable access korte duble $$ er modde dite hobe
+                  },
+                  {
+                    $eq: ['$isEnrolled', true], // veriable access korte duble $$ er modde dite hobe
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'enrolledCourses',
+      },
+    },
+    {
+      $addFields: {
+        isAlreadyEnrolled: {
+          // ei field er value true/false hobe. already enrolled hole true, na hole false.
+          $in: [
+            '$course._id',
+            {
+              $map: {
+                input: '$enrolledCourses', // je filed er upor loop gurbe
+                as: 'enroll', // map er single variable jatar modde akta akta kore value asbe
+                in: '$$enroll.course', // comparing here.
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      //enrolled hoa course gule ke skip kore felbo ai stage e. true gula bad.
+      $match: {
+        isAlreadyEnrolled: false,
+      },
+    },
+  ]);
+
   return result;
 };
 
@@ -179,7 +288,6 @@ const updateOfferedCourseIntoDB = async (
 
   const semesterRegistration = isOfferedCourseExists.semesterRegistration;
   // get the schedules of the faculties
-
 
   // Checking the status of the semester registration
   const semesterRegistrationStatus =
@@ -253,4 +361,5 @@ export const OfferedCourseServices = {
   getSingleOfferedCourseFromDB,
   deleteOfferedCourseFromDB,
   updateOfferedCourseIntoDB,
+  getMyOfferedCoursesFromDB,
 };
