@@ -224,7 +224,56 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
       },
     },
     {
+      //pre-requisite course gula complete hosce ki na. akta course er pre-requisite course complete holai kabol oi course ta dekhabe enroll korar jonno.
+      $lookup: {
+        from: 'enrolledcourses',
+        let: {
+          currentStudent: student._id,
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $eq: ['$student', '$$currentStudent'],
+                  },
+                  {
+                    $eq: ['$isCompleted', true],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'completedCourses',
+      },
+    },
+    //
+    {
       $addFields: {
+        completedCourseIds: {
+          $map: {
+            input: '$completedCourses',
+            as: 'completed',
+            in: '$$completed.course',
+          },
+        },
+      },
+    },
+    {
+      $addFields: {
+        isPreRequisitesFulFilled: {
+          $or: [
+            { $eq: ['$course.preRequisiteCourses', []] },
+            {
+              $setIsSubset: [
+                '$course.preRequisiteCourses.course',
+                '$completedCourseIds',
+              ],
+            },
+          ],
+        },
         isAlreadyEnrolled: {
           // ei field er value true/false hobe. already enrolled hole true, na hole false.
           $in: [
@@ -244,6 +293,7 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
       //enrolled hoa course gule ke skip kore felbo ai stage e. true gula bad.
       $match: {
         isAlreadyEnrolled: false,
+        isPreRequisitesFulFilled:true
       },
     },
   ]);
